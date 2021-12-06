@@ -25,7 +25,7 @@ function ShowSeed() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [copy, setCopy] = useState('Copy');
 
-  const { seed, isLoggedIn } = useSelector((state) => state.account);
+  const { seed, isLoggedIn } = useSelector((state) => state.activeAccount);
 
   const decryptedSeed = seed ? decrypt(seed, '123') : null;
 

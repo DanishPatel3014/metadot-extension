@@ -29,7 +29,7 @@ const fourRandomIndexes = arrayOfFourRandomNumbers();
 function ConfirmSeed() {
   const history = useHistory();
 
-  const { seed } = useSelector((state) => state.account);
+  const { seed } = useSelector((state) => state.activeAccount);
 
   const decryptedSeed = decrypt(seed, '123');
 

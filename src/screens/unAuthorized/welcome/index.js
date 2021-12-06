@@ -15,7 +15,7 @@ import { MainHeading, SubHeading } from './styledComponents';
 import { fonts } from '../../../utils';
 import accounts from '../../../utils/accounts';
 import './index.css';
-import { setSeed } from '../../../redux/slices/account';
+import { setSeed } from '../../../redux/slices/activeAccount';
 
 const { subHeadingfontFamilyClass } = fonts;
 const {

@@ -23,7 +23,7 @@ import {
 import CustomUploadFile from './customUploadFile';
 import { fonts, colors } from '../../../utils';
 import accounts from '../../../utils/accounts';
-import { setSeed } from '../../../redux/slices/account';
+import { setSeed } from '../../../redux/slices/activeAccount';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { primaryText, darkBackground1 } = colors;
@@ -75,6 +75,7 @@ function ImportWallet() {
             const tmpPassword = '123';
             const encryptedSeed = encrypt(seedPhrase, tmpPassword);
             dispatch(setSeed(encryptedSeed));
+            console.log('Hi there going to create wallet');
             history.push('/createWallet');
           } else if (!isErrorOccur) {
             console.log('r in else if ');
@@ -95,6 +96,8 @@ function ImportWallet() {
             const encryptedSeed = encrypt(seedPhrase, tmpPassword);
 
             dispatch(setSeed(encryptedSeed));
+
+            console.log('Hi there going to create wallet');
             history.push('/createWallet');
           } else if (!isErrorOccur) {
             console.log('r in else if ');

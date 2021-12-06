@@ -62,6 +62,15 @@ const AuthRoutes = [
     path: '/viewSeed',
     Component: ViewSeedPhrase,
   },
+  {
+    path: '/ImportWallet',
+    Component: ImportWallet,
+  },
+  {
+    path: '/createWallet',
+    Component: CreateWallet,
+  },
+
 ];
 
 export default { AuthRoutes, UnAuthRoutes };

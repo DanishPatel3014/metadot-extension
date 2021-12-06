@@ -17,7 +17,7 @@ import {
   setPublicKey,
   setAccountName,
   setSeed,
-} from '../../../redux/slices/account';
+} from '../../../redux/slices/activeAccount';
 import { fonts, helpers } from '../../../utils';
 import accounts from '../../../utils/accounts';
 import { LabelAndTextInput } from './styledComponents';
@@ -27,6 +27,7 @@ import {
   setMainTextForSuccessModal,
   setSubTextForSuccessModal,
 } from '../../../redux/slices/modalHandling';
+import { addAccount } from '../../../redux/slices/accounts';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { isUserNameValid } = helpers;
@@ -44,7 +45,11 @@ function CreateWallet() {
   const dispatch = useDispatch();
   const history = useHistory();
 
-  const { seed } = useSelector((state) => state.account);
+  console.log('ahsan==>>');
+
+  const { seed } = useSelector((state) => state.activeAccount);
+
+  console.log('ahsan==>>', seed);
 
   const [walletName, setWalletName] = useState('');
   const [isValidWalletName, setIsValidWalletName] = useState(false);
@@ -111,6 +116,11 @@ function CreateWallet() {
 
     const encryptedSeedWithAccountPassword = encrypt(decryptedSeed, pass);
     dispatch(setSeed(encryptedSeedWithAccountPassword));
+    dispatch(addAccount({
+      seed: encryptedSeedWithAccountPassword,
+      accountName: name,
+      publicKey: add,
+    }));
   };
 
   const showSuccessModalAndNavigateToDashboard = () => {

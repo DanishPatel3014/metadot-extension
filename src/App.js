@@ -1,8 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
-import {
-  MemoryRouter as Router, Switch, Route,
-} from 'react-router-dom';
+import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import './App.css';
@@ -38,42 +36,41 @@ function App() {
   const renderFunction = () => {
     let content;
 
-    if (!currentUser.account.isLoggedIn && currentUser.account.publicKey) {
+    if (
+      !currentUser.activeAccount.isLoggedIn
+      && currentUser.activeAccount.publicKey
+    ) {
       content = <WelcomeBack />;
     } else if (
       // prettier-ignore
-      currentUser.account.isLoggedIn
-      && currentUser.account.publicKey
+      currentUser.activeAccount.isLoggedIn
+      && currentUser.activeAccount.publicKey
     ) {
       content = (
         <div>
-          <ApiManager rpc={currentUser.account.rpcUrl} />
+          <ApiManager rpc={currentUser.activeAccount.rpcUrl} />
 
-          {
-                 AuthRoutes.map((route) => {
-                   const { path, Component } = route;
-                   return (
-                     <Route exact path={path} key={path}>
-                       <Component />
-                     </Route>
-                   );
-                 })
-            }
+          {AuthRoutes.map((route) => {
+            const { path, Component } = route;
+            return (
+              <Route exact path={path} key={path}>
+                <Component />
+              </Route>
+            );
+          })}
         </div>
       );
     } else {
       content = (
         <div>
-          {
-              UnAuthRoutes.map((route) => {
-                const { path, Component } = route;
-                return (
-                  <Route exact path={path} key={path}>
-                    <Component />
-                  </Route>
-                );
-              })
-            }
+          {UnAuthRoutes.map((route) => {
+            const { path, Component } = route;
+            return (
+              <Route exact path={path} key={path}>
+                <Component />
+              </Route>
+            );
+          })}
         </div>
       );
     }

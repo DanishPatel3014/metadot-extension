@@ -18,8 +18,8 @@ const initialState = {
   keyringInitialized: false,
 };
 
-export const accountSlice = createSlice({
-  name: 'account',
+export const activeAccountSlice = createSlice({
+  name: 'activeAccount',
   initialState,
   reducers: {
     setKeyringInitialized: (state, action) => {
@@ -84,6 +84,6 @@ export const {
   setBalanceInUsd,
   deleteRedux,
   setKeyringInitialized,
-} = accountSlice.actions;
+} = activeAccountSlice.actions;
 
-export default accountSlice.reducer;
+export default activeAccountSlice.reducer;
