@@ -4,10 +4,11 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-throw-literal */
 /* eslint import/no-cycle: [2, { maxDepth: 1 }] */
-import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import React, { useState, useEffect } from 'react';
+import { useHistory, useParams } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import { Input } from '@material-ui/core';
+
 import {
   Option, OptionDiv, UploadFile, FileChosen, UploadFileDiv,
 } from './styledComponents';
@@ -27,7 +28,9 @@ import { setSeed } from '../../../redux/slices/activeAccount';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { primaryText, darkBackground1 } = colors;
-const { encrypt, KeyringInitialization, validatingSeedPhrase } = accounts;
+const {
+  decrypt, encrypt, KeyringInitialization, validatingSeedPhrase,
+} = accounts;
 
 const invalidSeedMessages = {
   minimumWords: 'At least 12 words required!',
@@ -37,15 +40,37 @@ const invalidSeedMessages = {
 
 function ImportWallet() {
   const history = useHistory();
+  const params = useParams();
   const dispatch = useDispatch();
+
+  const accounts = useSelector((state) => state.accounts);
+
+  console.log('ahsanahmed ==>>', params);
 
   const [selectedType, setSelectedType] = useState('seed');
   const [seedPhrase, setSeedPhrase] = useState('');
   const [invalidSeedMessage, setInvalidSeedMessage] = useState('');
+  const [password, setPassword] = useState('');
+
+  useEffect(() => {
+    const dSeed = decrypt(params.seed, 'Dell1234');
+    let derivedSeed = '';
+    let i = 0;
+    do {
+      derivedSeed = `${dSeed}//${i}`;
+      i += 1;
+      console.log('some very serious testing', accounts, encrypt(derivedSeed, '123'), accounts[encrypt(derivedSeed, 'Dell1234')]);
+    } while (accounts[encrypt(derivedSeed, '123')]);
+    setSeedPhrase(derivedSeed);
+  }, [accounts, params, password]);
 
   const handleChange = (input) => {
     setInvalidSeedMessage('');
     setSeedPhrase(input);
+  };
+
+  const passwordChangeHandler = (e) => {
+    setPassword(e.target.value);
   };
 
   const validateSeed = async () => {
@@ -209,6 +234,7 @@ function ImportWallet() {
     <AuthWrapper>
       <Header centerText="Import Wallet" backHandler={() => console.log('goBack')} />
       <div>
+        <Input onChange={passwordChangeHandler} />
         <MainHeading {...mainHeading}>Restore your wallet : </MainHeading>
         <SubHeading textLightColor {...subHeading}>
           To restore your wallet enter your Seed phrase.

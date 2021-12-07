@@ -12,8 +12,10 @@ import LockOutlinedIcon from '../../../assets/images/icons/lock.svg';
 import RemoveIcon from '../../../assets/images/icons/Remove.svg';
 import ForumOutlinedIcon from '../../../assets/images/icons/support.svg';
 import viewSeedIcon from '../../../assets/images/icons/openEye.svg';
-import { resetAccountSlice, setLoggedIn } from '../../../redux/slices/activeAccount';
-import { resetTransactions } from '../../../redux/slices/transactions';
+import {
+  setLoggedIn, setSeed, setPublicKey, setAccountName,
+} from '../../../redux/slices/activeAccount';
+import { deleteAccount } from '../../../redux/slices/accounts';
 // import SettingsOutlinedIcon from '../../../assets/images/icons/setting.svg';
 // import FileUploadOutlinedIcon from '../../../assets/images/icons/export.svg';
 // import FileDownloadOutlinedIcon from '../../../assets/images/icons/download.svg';
@@ -22,7 +24,7 @@ import { resetTransactions } from '../../../redux/slices/transactions';
 // import ChevronRightOutlinedIcon from '../../../assets/images/icons/rightArrowIcon.svg';
 
 const DropDown = ({
-  open, handleClose, anchorEl, classes, accounts, setSeed, setPublicKey, setAccountName,
+  open, handleClose, anchorEl, classes, activeAccount, accounts,
 }) => {
   const dispatch = useDispatch();
   const history = useHistory();
@@ -151,6 +153,14 @@ const DropDown = ({
                   &nbsp; &nbsp;
                 <span style={{ fontSize: '0.85rem' }}>{account.accountName}</span>
               </ListItemIcon>
+              <button
+                type="button"
+                onClick={() => {
+                  history.push(`/ImportWallet/${account.seed}`);
+                }}
+              >
+                D
+              </button>
             </MenuItem>
           ))}
           <MenuItem
@@ -197,8 +207,12 @@ const DropDown = ({
             id="menu-item-2"
             style={{ minHeight: '37px', color: '#fafafa' }}
             onClick={() => {
-              dispatch(resetAccountSlice());
-              dispatch(resetTransactions());
+              dispatch(deleteAccount(activeAccount));
+              // dispatch(resetAccountSlice());
+              // dispatch(resetTransactions());
+              dispatch(setSeed(Object.values(accounts)[0].seed));
+              dispatch(setPublicKey(Object.values(accounts)[0].publicKey));
+              dispatch(setAccountName(Object.values(accounts)[0].accountName));
             }}
           >
             <ListItemIcon className="flexStart" style={{ color: '#fafafa' }}>

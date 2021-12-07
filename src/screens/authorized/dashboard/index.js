@@ -21,12 +21,7 @@ import AssetsAndTransactions from './assetsAndTransactions';
 
 import { setApiInitializationStarts } from '../../../redux/slices/api';
 import {
-  setRpcUrl,
-  setBalance,
-  setChainName,
-  setSeed,
-  setAccountName,
-  setPublicKey,
+  setRpcUrl, setBalance, setChainName,
 } from '../../../redux/slices/activeAccount';
 
 import {
@@ -92,7 +87,7 @@ function Dashboard(props) {
   const currentUser = useSelector((state) => state);
   const { apiInitializationStarts } = useSelector((state) => state.api);
   const {
-    publicKey, chainName, balance, tokenName, balanceInUsd, accountName, walletName,
+    publicKey, chainName, balance, tokenName, balanceInUsd, accountName, walletName, seed,
   } = currentUser.activeAccount;
   async function main() {
     const { api } = currentUser.api;
@@ -320,10 +315,9 @@ function Dashboard(props) {
             open={open}
             handleClose={handleClose}
             classes={classes}
+            activeAccount={seed}
             accounts={accounts}
-            setSeed={setSeed}
-            setPublicKey={setPublicKey}
-            setAccountName={setAccountName}
+
           />
           {/* Menu End */}
 
