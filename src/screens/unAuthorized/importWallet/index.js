@@ -29,7 +29,7 @@ import { setSeed } from '../../../redux/slices/activeAccount';
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { primaryText, darkBackground1 } = colors;
 const {
-  decrypt, encrypt, KeyringInitialization, validatingSeedPhrase,
+  decrypt, encrypt, KeyringInitialization, validatingSeedPhrase, AccountCreation,
 } = accounts;
 
 const invalidSeedMessages = {
@@ -45,6 +45,7 @@ function ImportWallet() {
 
   const accounts = useSelector((state) => state.accounts);
 
+  // eslint-disable-next-line no-console
   console.log('ahsanahmed ==>>', params);
 
   const [selectedType, setSelectedType] = useState('seed');
@@ -53,15 +54,27 @@ function ImportWallet() {
   const [password, setPassword] = useState('');
 
   useEffect(() => {
-    const dSeed = decrypt(params.seed, 'Dell1234');
-    let derivedSeed = '';
-    let i = 0;
-    do {
-      derivedSeed = `${dSeed}//${i}`;
-      i += 1;
-      console.log('some very serious testing', accounts, encrypt(derivedSeed, '123'), accounts[encrypt(derivedSeed, 'Dell1234')]);
-    } while (accounts[encrypt(derivedSeed, '123')]);
-    setSeedPhrase(derivedSeed);
+    const accountExistCheck = async () => {
+      if (params.seed) {
+        const dSeed = decrypt(params.seed, 'Dell1234');
+        let derivedSeed = '';
+        let derivedAccount = '';
+        let i = 0;
+        do {
+          derivedSeed = `${dSeed}//${i}`;
+          console.log('derived account before');
+          // eslint-disable-next-line no-await-in-loop
+          derivedAccount = await AccountCreation({ name: 'AAA', password: 'BBB', seed: derivedSeed });
+          console.log('derived Account ==>>', derivedAccount);
+          i += 1;
+        } while (accounts[derivedAccount.address]);
+
+        console.log('derived account after');
+        setSeedPhrase(derivedSeed);
+      }
+    };
+
+    accountExistCheck();
   }, [accounts, params, password]);
 
   const handleChange = (input) => {

@@ -14,7 +14,7 @@ export const accountsSlice = createSlice({
   reducers: {
 
     addAccount: (state, action) => {
-      state[action.payload.seed] = action.payload;
+      state[action.payload.publicKey] = action.payload;
     },
 
     deleteAccount: (state, action) => {
