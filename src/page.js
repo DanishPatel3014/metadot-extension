@@ -1,10 +1,6 @@
-// Copyright 2019-2021 @polkadot/extension authors & contributors
-// SPDX-License-Identifier: Apache-2.0
-
 import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
-// setup a response listener (events created by the loader for extension responses)
 window.addEventListener('message', ({ data, source }) => {
   // only allow messages from our window, by the loader
   if (source !== window || data.origin !== 'content') {
@@ -19,17 +15,19 @@ window.addEventListener('message', ({ data, source }) => {
 });
 
 redirectIfPhishing().then((gotRedirected) => {
+  console.log('got redirected');
   if (!gotRedirected) {
+    console.log('got redirected in');
     inject();
   }
 }).catch((e) => {
-  console.warn(`Unable to determine if the site is in the phishing list: ${(e).message}`);
+  console.log(`Unable to determine if the site is in the phishing list: ${(e).message}`);
   inject();
 });
 
 function inject() {
   injectExtension(enable, {
-    name: 'metadot',
-    version: '0.0.1',
+    name: 'Metadot',
+    version: '0.0.3',
   });
 }
