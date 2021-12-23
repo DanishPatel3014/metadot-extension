@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -12,9 +12,44 @@ import ApiManager from './apiManager';
 import { routes } from './utils';
 import WelcomeBack from './screens/unAuthorized/welcomeBack';
 
+import {
+  subscribeAccounts, subscribeAuthorizeRequests,
+  subscribeMetadataRequests, subscribeSigningRequests,
+} from './messaging';
+
 const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
+  const [accounts, setAccounts] = useState([]);
+  const [authRequests, setAuthRequests] = useState([]);
+  const [metaRequests, setMetaRequests] = useState([]);
+  const [signRequests, setSignRequests] = useState([]);
+
+  useEffect(() => {
+    Promise.all([
+      subscribeAccounts(setAccounts),
+      subscribeAuthorizeRequests(setAuthRequests),
+      subscribeMetadataRequests(setMetaRequests),
+      subscribeSigningRequests(setSignRequests),
+    ]).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    console.log('accounts ==>>', accounts);
+  }, [accounts]);
+
+  useEffect(() => {
+    console.log('authRequests ==>>', authRequests);
+  }, [authRequests]);
+
+  useEffect(() => {
+    console.log('metaRequests ==>>', metaRequests);
+  }, [metaRequests]);
+
+  useEffect(() => {
+    console.log('signRequests ==>>', signRequests);
+  }, [signRequests]);
+
   // prettier-ignore
   const currentUser = useSelector((state) => state);
   const {
