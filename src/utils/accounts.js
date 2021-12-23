@@ -26,7 +26,7 @@ async function validatingSeedPhrase(seedPhrase) {
 
 // need to invoke this function in background.js script
 async function KeyringInitialization() {
-  await keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
+  // await keyring.loadAll({ store: new AccountsStore(), type: 'sr25519' });
   // await keyring.loadAll({ type: 'sr25519' });
 }
 
