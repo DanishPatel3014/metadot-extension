@@ -12,7 +12,6 @@ module.exports = {
     background: ['@babel/polyfill', './src/background.js'],
     content: ['@babel/polyfill', './src/content.js'],
     page: ['@babel/polyfill', './src/page.js'],
-
   },
   output: {
     path: path.resolve(__dirname, 'build'),
