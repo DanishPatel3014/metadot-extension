@@ -1,11 +1,10 @@
 // Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
 // connect to the extension
-const port = chrome.runtime.connect({ name: PORT_CONTENT });
+const port = chrome.runtime.connect({ name: 'content' });
 
 // send any messages from the extension back to the page
 port.onMessage.addListener((data) => {
