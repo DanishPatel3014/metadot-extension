@@ -8,8 +8,11 @@ const pkgJson = require('./package.json');
 
 module.exports = {
   entry: {
-    popup: ['@babel/polyfill', './src/index.js'],
+    extension: ['@babel/polyfill', './src/index.js'],
     background: ['@babel/polyfill', './src/background.js'],
+    content: ['@babel/polyfill', './src/content.js'],
+    page: ['@babel/polyfill', './src/page.js'],
+
   },
   output: {
     path: path.resolve(__dirname, 'build'),

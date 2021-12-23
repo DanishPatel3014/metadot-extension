@@ -1,7 +1,7 @@
 // Runs in the extension background, handling all keyring access
 
 import handlers from '@polkadot/extension-base/background/handlers';
-import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import { AccountsStore } from '@polkadot/extension-base/stores';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
@@ -15,7 +15,7 @@ void chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
 // listen to all messages and handle appropriately
 chrome.runtime.onConnect.addListener((port) => {
   // shouldn't happen, however... only listen to what we know about
-  assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
+  assert(['content', PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
   // message and disconnect handlers
   port.onMessage.addListener((data) => handlers(data, port));
@@ -32,6 +32,6 @@ cryptoWaitReady()
 
     console.log('initialization completed');
   })
-  .catch((error): void => {
+  .catch((error) => {
     console.error('initialization failed', error);
   });

@@ -3,6 +3,7 @@
   "description": "A crypto wallet for Polkadot based chains and their parachains",
   "version": "0.0.3",
   "manifest_version": 2,
+  "permissions": ["storage", "tabs"],
   "browser_action": {
     "default_popup": "index.html",
     "default_title": "Metadot"
@@ -17,7 +18,7 @@
     "scripts": ["background.js"],
     "persistent": false
   },
-  "permissions": ["storage"],
+  "web_accessible_resources": ["page.js"],
   "browser_specific_settings": {
     "gecko": {
       "id": "{5f568f4f-6781-4a94-83cd-7e2a7cf1bf70}"
