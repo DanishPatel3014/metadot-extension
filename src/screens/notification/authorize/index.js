@@ -1,9 +1,9 @@
 import React from 'react';
 
-function authorize(props) {
+function authorize({ approve, request }) {
   return (
     <div>
-      <button type="button" onClick={props.onclick}>Authorize</button>
+      <button type="button" onClick={() => approve(request.id)}>Authorize</button>
     </div>
   );
 }

@@ -75,7 +75,7 @@ function App() {
   const renderFunction = () => {
     let content;
     if (authRequests && authRequests.length > 0) {
-      content = <Authorize request={authRequests[0]} onclick={approveAuthRequest} />;
+      content = <Authorize request={authRequests[0]} approve={approveAuthRequest} />;
     } else if (
       !currentUser.activeAccount.isLoggedIn
       && currentUser.activeAccount.publicKey
