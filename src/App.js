@@ -11,26 +11,30 @@ import { setIsTransactionProgressModalOpen } from './redux/slices/transctionProg
 import ApiManager from './apiManager';
 import { routes } from './utils';
 import WelcomeBack from './screens/unAuthorized/welcomeBack';
+import Authorize from './screens/notification/authorize';
 
 import {
-  subscribeAccounts, subscribeAuthorizeRequests,
-  subscribeMetadataRequests, subscribeSigningRequests,
+  subscribeAccounts, subscribeAuthorizeRequests, approveAuthRequest,
 } from './messaging';
+
+// import {
+//   subscribeMetadataRequests, subscribeSigningRequests,
+// } from './messaging';
 
 const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
   const [accounts, setAccounts] = useState([]);
   const [authRequests, setAuthRequests] = useState([]);
-  const [metaRequests, setMetaRequests] = useState([]);
-  const [signRequests, setSignRequests] = useState([]);
+  // const [metaRequests, setMetaRequests] = useState([]);
+  // const [signRequests, setSignRequests] = useState([]);
 
   useEffect(() => {
     Promise.all([
       subscribeAccounts(setAccounts),
       subscribeAuthorizeRequests(setAuthRequests),
-      subscribeMetadataRequests(setMetaRequests),
-      subscribeSigningRequests(setSignRequests),
+      // subscribeMetadataRequests(setMetaRequests),
+      // subscribeSigningRequests(setSignRequests),
     ]).catch(console.error);
   }, []);
 
@@ -42,13 +46,13 @@ function App() {
     console.log('authRequests ==>>', authRequests);
   }, [authRequests]);
 
-  useEffect(() => {
-    console.log('metaRequests ==>>', metaRequests);
-  }, [metaRequests]);
+  // useEffect(() => {
+  //   console.log('metaRequests ==>>', metaRequests);
+  // }, []);
 
-  useEffect(() => {
-    console.log('signRequests ==>>', signRequests);
-  }, [signRequests]);
+  // useEffect(() => {
+  //   console.log('signRequests ==>>', signRequests);
+  // }, []);
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
@@ -70,8 +74,9 @@ function App() {
 
   const renderFunction = () => {
     let content;
-
-    if (
+    if (authRequests && authRequests.length > 0) {
+      content = <Authorize request={authRequests[0]} onclick={approveAuthRequest} />;
+    } else if (
       !currentUser.activeAccount.isLoggedIn
       && currentUser.activeAccount.publicKey
     ) {
