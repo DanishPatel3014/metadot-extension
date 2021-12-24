@@ -29,6 +29,8 @@ import {
 } from '../../../redux/slices/modalHandling';
 import { addAccount } from '../../../redux/slices/accounts';
 
+import { createAccountSuri } from '../../../messaging';
+
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { isUserNameValid } = helpers;
 const { AccountCreation, decrypt, encrypt } = accounts;
@@ -99,6 +101,7 @@ function CreateWallet() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // eslint-disable-next-line no-unused-vars
   const createAccount = async (name, pass, seedPhrase) => {
     const res = await AccountCreation({ name, password: pass, seed: seedPhrase });
     return res;
@@ -155,7 +158,9 @@ function CreateWallet() {
         setIsLoading(false);
         return;
       }
-      const res = await createAccount(walletName, password, decryptedSeedW);
+      // const res = await createAccount(walletName, password, decryptedSeedW);
+      const res = await createAccountSuri(walletName, password, decryptedSeedW);
+
       // passsword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/);
       // eslint-disable-next-line no-new
 
