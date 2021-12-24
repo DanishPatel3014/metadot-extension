@@ -90,6 +90,10 @@ module.exports = {
       template: './public/index.html',
       filename: 'index.html',
     }),
+    new HtmlWebpackPlugin({
+      template: './public/notification.html',
+      filename: 'notification.html',
+    }),
     new CopyPlugin({
       patterns: [
         { from: './public/manifest.json' },
