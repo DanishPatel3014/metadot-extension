@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import './App.css';
 
+import keyring from '@polkadot/ui-keyring';
 import { ResponseModal, TransactionProgress } from './components';
 import { setIsResponseModalOpen } from './redux/slices/modalHandling';
 import { setIsTransactionProgressModalOpen } from './redux/slices/transctionProgressModalHandling';
@@ -14,7 +15,15 @@ import WelcomeBack from './screens/unAuthorized/welcomeBack';
 import Authorize from './screens/notification/authorize';
 
 import {
-  subscribeAccounts, subscribeAuthorizeRequests, approveAuthRequest,
+  setLoggedIn,
+  setPublicKey,
+  setAccountName,
+} from './redux/slices/activeAccount';
+import { addAccount } from './redux/slices/accounts';
+
+import {
+  subscribeAccounts,
+  approveAuthRequest,
 } from './messaging';
 
 // import {
@@ -30,16 +39,38 @@ function App() {
   // const [signRequests, setSignRequests] = useState([]);
 
   useEffect(() => {
-    Promise.all([
-      subscribeAccounts(setAccounts),
-      subscribeAuthorizeRequests(setAuthRequests),
-      // subscribeMetadataRequests(setMetaRequests),
-      // subscribeSigningRequests(setSignRequests),
-    ]).catch(console.error);
+    subscribeAccounts(setAccounts);
+    // subscribeAuthorizeRequests(setAuthRequests);
+    // subscribeMetadataRequests(setMetaRequests),
+    // subscribeSigningRequests(setSignRequests),
   }, []);
 
   useEffect(() => {
+    const saveAccountInRedux = ({ name, address }) => {
+      // update redux data and tracking flags accordingly
+      dispatch(setLoggedIn(true));
+      dispatch(setPublicKey(address));
+      dispatch(setAccountName(name));
+      // dispatch(setWalletPassword(hashedPassword));
+
+      dispatch(addAccount({
+        accountName: name,
+        publicKey: address,
+      }));
+    };
+
     console.log('accounts ==>>', accounts);
+    if (accounts.length > 0) {
+      try {
+        keyring.loadAll({ type: 'sr25519' }, accounts);
+      } catch (error) {
+        keyring.loadInjected(accounts[accounts.length - 1].address,
+          accounts[accounts.length - 1].meta, accounts[accounts.length - 1].type);
+      }
+      saveAccountInRedux(accounts[accounts.length - 1]);
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accounts]);
 
   useEffect(() => {

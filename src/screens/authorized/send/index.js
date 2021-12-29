@@ -98,7 +98,7 @@ const Send = () => {
 
   const currentUser = useSelector((state) => state);
   const { api } = currentUser.api;
-  const { rpcUrl } = currentUser.account;
+  const { rpcUrl } = currentUser.activeAccount;
   const [isSendModalOpen, setIsSendModalOpen] = useState(false);
 
   // const [accountTo, setAccountTo] = useState('');
@@ -115,14 +115,14 @@ const Send = () => {
 
   // eslint-disable-next-line prefer-const
   let data = {
-    accountFrom: currentUser.account.publicKey,
+    accountFrom: currentUser.activeAccount.publicKey,
     accountTo: accountToSate.value,
     amount: amountState.value,
     hash: '',
     operation: '',
     status: '',
-    chainName: currentUser.account.chainName,
-    tokenName: currentUser.account.tokenName,
+    chainName: currentUser.activeAccount.chainName,
+    tokenName: currentUser.activeAccount.tokenName,
     transactionFee,
   };
 
@@ -141,7 +141,7 @@ const Send = () => {
   }, [isValid, amountIsValid, amountState.isValid]);
 
   const accountToChangeHandler = (e) => {
-    accountDispatch({ type: 'USER_INPUT', val: e, valid: currentUser.account.publicKey });
+    accountDispatch({ type: 'USER_INPUT', val: e, valid: currentUser.activeAccount.publicKey });
   };
 
   const accountToIsValid = () => {
@@ -150,7 +150,7 @@ const Send = () => {
 
   const amountHandler = (e) => {
     setInsufficientBal();
-    amountDispatch({ type: 'USER_INPUT', val: e, amountIsValid: currentUser.account.balance });
+    amountDispatch({ type: 'USER_INPUT', val: e, amountIsValid: currentUser.activeAccount.balance });
   };
 
   const amountIsValidHandler = () => {
@@ -159,22 +159,22 @@ const Send = () => {
 
   const convertTransactionFee = (fee) => {
     const splitFee = fee.split(' ');
-    if (currentUser.account.tokenName === 'WND') {
+    if (currentUser.activeAccount.tokenName === 'WND') {
       return (splitFee[0] * 10 ** -3).toFixed(4);
     }
-    if (currentUser.account.tokenName === 'KSM') {
+    if (currentUser.activeAccount.tokenName === 'KSM') {
       return (splitFee[0] * 10 ** -6).toFixed(4);
     }
-    if (currentUser.account.tokenName === 'PLD') {
+    if (currentUser.activeAccount.tokenName === 'PLD') {
       return splitFee[0];
     }
-    if (currentUser.account.tokenName === 'ACA') {
+    if (currentUser.activeAccount.tokenName === 'ACA') {
       return (splitFee[0] * 10 ** -3).toFixed(4);
     }
-    if (currentUser.account.tokenName === 'ROC') {
+    if (currentUser.activeAccount.tokenName === 'ROC') {
       return (splitFee[0] * 10 ** -3).toFixed(4);
     }
-    if (currentUser.account.tokenName === 'DOT') {
+    if (currentUser.activeAccount.tokenName === 'DOT') {
       return (splitFee[0] * 10 ** -3).toFixed(4);
     }
     return true;
@@ -217,12 +217,12 @@ const Send = () => {
     console.log('Start*******');
     // const decimalPlaces = await api.registry.chainDecimals;
     // const info = await api.tx.balances
-    //   .transfer(currentUser.account.publicKey, amountState.value * 10 ** decimalPlaces)
+    //   .transfer(currentUser.activeAccount.publicKey, amountState.value * 10 ** decimalPlaces)
     //   .paymentInfo(accountToSate.value);
 
     // const txFee = await convertTransactionFee(info.partialFee.toHuman());
     // console.log('transaction fee ---------', txFee);
-    // amountDispatch({ type: 'MAX_INPUT', bal: currentUser.account.balance, txFee });
+    // amountDispatch({ type: 'MAX_INPUT', bal: currentUser.activeAccount.balance, txFee });
     // console.log('End--------------');
   };
 
@@ -231,13 +231,13 @@ const Send = () => {
     const decimalPlaces = await currentUser.api.api.registry.chainDecimals[0];
 
     // const recipientBalance = await getBalance(api, accountToSate.value);
-    // if (currentUser.account.rpcUrl === constants.ACALA_MANDALA_CONFIG.RPC_URL) {
+    // if (currentUser.activeAccount.rpcUrl === constants.ACALA_MANDALA_CONFIG.RPC_URL) {
     //   recipientBalance = await
     //   getBalanceWithMultipleTokens(api, accountToSate.value);
     // } else {
     const recipientBalance = await getBalance(api, accountToSate.value);
     // }
-    const senderBalance = currentUser.account.balance;
+    const senderBalance = currentUser.activeAccount.balance;
     console.log('TYPE [][]', typeof recipientBalance, typeof amountState.value);
     console.log('Recipient balance + amount to state', Number(recipientBalance) + Number(amountState.value));
 
@@ -261,15 +261,15 @@ const Send = () => {
     }
   };
 
-  const doTransaction = async (deSeed) => {
+  const doTransaction = async (sender) => {
     console.clear();
-    const keyring = new Keyring({ type: 'sr25519' });
+    // const keyring = new Keyring({ type: 'sr25519' });
 
     const decimalPlaces = await api.registry.chainDecimals;
     console.log('b');
     setLoading2(true);
     console.log('c');
-    const sender = keyring.addFromUri(deSeed);
+    // const sender = keyring.addFromUri(deSeed);
     data.operation = 'Send';
     const decimals = decimalPlaces.length > 1
       ? decimalPlaces[0] : decimalPlaces;
@@ -637,7 +637,7 @@ const Send = () => {
   };
 
   const validateInputValues = (address) => {
-    if (currentUser.account.balance < amountState.value) {
+    if (currentUser.activeAccount.balance < amountState.value) {
       throw new Error('Insufficient funds');
     }
     if (!accountToSate.value) {
@@ -679,7 +679,7 @@ const Send = () => {
 
   // eslint-disable-next-line no-unused-vars
   const handleSubmit = async () => {
-    console.log('User balance', currentUser.account.balance);
+    console.log('User balance', currentUser.activeAccount.balance);
     console.log('Redux state api []][]', rpcUrl);
     console.log('Check existential deposit', accountToSate);
     // if (rpcUrl === constants.ACALA_MANDALA_CONFIG.RPC_URL) {
@@ -699,10 +699,10 @@ const Send = () => {
       if (!validateInputValues(accountToSate.value)) throw new Error('An error occurred');
       console.log('Before info');
       const info = await
-      getTransactionFee(api, currentUser.account.publicKey,
+      getTransactionFee(api, currentUser.activeAccount.publicKey,
         accountToSate.value, decimalPlaces, amountState.value);
       // const info = await api.tx.balances
-      //   .transfer(currentUser.account.publicKey, amountState.value * 10 ** decimalPlaces)
+      //   .transfer(currentUser.activeAccount.publicKey, amountState.value * 10 ** decimalPlaces)
       //   .paymentInfo(accountToSate.value);
 
       console.log('After info');
@@ -710,11 +710,11 @@ const Send = () => {
       console.log('After tx');
       console.log('TX fee', txFee);
       data.txFee = txFee;
-      data.chainName = currentUser.account.chainName;
+      data.chainName = currentUser.activeAccount.chainName;
       setTransactionFee(txFee);
       setLoading1(false);
       // checking if balance is enough to send the amount with network fee
-      if (currentUser.account.balance < (Number(amountState.value) + Number(txFee))) {
+      if (currentUser.activeAccount.balance < (Number(amountState.value) + Number(txFee))) {
         setInsufficientBal(true);
         console.log('hello');
       } else {
@@ -795,13 +795,13 @@ const Send = () => {
       pb: 3,
       mt: 10,
     },
-    accountFrom: currentUser.account.publicKey,
+    accountFrom: currentUser.activeAccount.publicKey,
     accountTo: accountToSate.value,
     amount: amountState.value,
     open: currentUser.modalHandling.confirmSendModal,
     transactionFee,
-    tokenName: currentUser.account.tokenName,
-    fromAccountName: currentUser.account.accountName,
+    tokenName: currentUser.activeAccount.tokenName,
+    fromAccountName: currentUser.activeAccount.accountName,
 
     handleClose: () => dispatch(setConfirmSendModal(false)),
     handleConfirm: doTransaction,

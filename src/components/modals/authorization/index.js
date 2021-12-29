@@ -4,6 +4,7 @@ import { useHistory } from 'react-router';
 import { useDispatch, useSelector } from 'react-redux';
 import { Modal } from '@mui/material';
 import { Box } from '@mui/system';
+import keyring from '@polkadot/ui-keyring';
 import Button from '../../button';
 import { fonts } from '../../../utils';
 import accounts from '../../../utils/accounts';
@@ -33,11 +34,16 @@ function AuthModal({
       return false;
     }
     try {
-      const dSeed = decrypt(currentUser.seed, password);
+      const sender = keyring.getPair(currentUser.publicKey);
+      console.log('sender =>>', sender);
+      const unlockedSender = sender.unlock(password);
+      console.log('sender unlocked =>>', unlockedSender);
+
+      // const dSeed = decrypt(currentUser.seed, password);
       console.log('Correct');
       dispatch(setAuthScreenModal(false));
       dispatch(setConfirmSendModal(true));
-      sendTransaction(dSeed);
+      sendTransaction(sender);
     } catch (err) {
       console.log('error due to wrong ', err);
       // alert('Password does not match');

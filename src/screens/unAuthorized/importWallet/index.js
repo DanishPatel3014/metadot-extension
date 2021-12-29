@@ -29,7 +29,7 @@ import { setSeed } from '../../../redux/slices/activeAccount';
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { primaryText, darkBackground1 } = colors;
 const {
-  decrypt, encrypt, KeyringInitialization, validatingSeedPhrase, AccountCreation,
+  decrypt, encrypt, validatingSeedPhrase, AccountCreation,
 } = accounts;
 
 const invalidSeedMessages = {
@@ -103,23 +103,30 @@ function ImportWallet() {
         setInvalidSeedMessage(minimumWords);
         return minimumWords;
       }
-      await KeyringInitialization();
-      const res = validatingSeedPhrase(seedPhrase);
-      res
-        .then((r) => {
-          console.log('r value', r);
-          if (r) {
-            console.log('r in if ');
-            const tmpPassword = '123';
-            const encryptedSeed = encrypt(seedPhrase, tmpPassword);
-            dispatch(setSeed(encryptedSeed));
-            console.log('Hi there going to create wallet');
-            history.push('/createWallet');
-          } else if (!isErrorOccur) {
-            console.log('r in else if ');
-            setInvalidSeedMessage(seedDoesnotExist);
-          }
-        }).catch((e) => console.log('err', e));
+
+      const tmpPassword = '123';
+      const encryptedSeed = encrypt(seedPhrase, tmpPassword);
+      dispatch(setSeed(encryptedSeed));
+      console.log('Hi there going to create wallet');
+      history.push('/createWallet');
+
+      // await KeyringInitialization();
+      // const res = validatingSeedPhrase(seedPhrase);
+      // res
+      //   .then((r) => {
+      //     console.log('r value', r);
+      //     if (r) {
+      //       console.log('r in if ');
+      //       const tmpPassword = '123';
+      //       const encryptedSeed = encrypt(seedPhrase, tmpPassword);
+      //       dispatch(setSeed(encryptedSeed));
+      //       console.log('Hi there going to create wallet');
+      //       history.push('/createWallet');
+      //     } else if (!isErrorOccur) {
+      //       console.log('r in else if ');
+      //       setInvalidSeedMessage(seedDoesnotExist);
+      //     }
+      //   }).catch((e) => console.log('err', e));
 
       return true;
     } catch (err) {

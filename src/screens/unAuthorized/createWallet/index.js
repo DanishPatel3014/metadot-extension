@@ -107,6 +107,7 @@ function CreateWallet() {
     return res;
   };
 
+  // eslint-disable-next-line no-unused-vars
   const saveAccountInRedux = (add, name, pass) => {
     // update redux data and tracking flags accordingly
     dispatch(setLoggedIn(true));
@@ -159,12 +160,12 @@ function CreateWallet() {
         return;
       }
       // const res = await createAccount(walletName, password, decryptedSeedW);
-      const res = await createAccountSuri(walletName, password, decryptedSeedW);
+      await createAccountSuri(walletName, password, decryptedSeedW);
 
       // passsword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/);
       // eslint-disable-next-line no-new
 
-      await saveAccountInRedux(res.address, walletName, password);
+      // await saveAccountInRedux(res.address, walletName, password);
       dispatch(setLoadingFor('Setting things up...'));
       setIsLoading(false);
       await showSuccessModalAndNavigateToDashboard();
