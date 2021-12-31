@@ -28,6 +28,7 @@ import {
   setMainTextForSuccessModal,
   setSubTextForSuccessModal,
 } from '../../../redux/slices/successModalHandling';
+import { addressMapper } from '../../../utils/services';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { isUserNameValid } = helpers;
@@ -147,9 +148,9 @@ function CreateWallet() {
       }
       const res = await createAccount(walletName, password, decryptedSeedW);
       // passsword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/);
-      // eslint-disable-next-line no-new
-
-      await saveAccountInRedux(res.address, walletName, password);
+      const address = addressMapper(res.address, 0);
+      console.log('Address ......', address);
+      await saveAccountInRedux(address, walletName, password);
       dispatch(setLoadingFor('Setting things up...'));
       setIsLoading(false);
       await showSuccessModalAndNavigateToDashboard();

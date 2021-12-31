@@ -1,6 +1,8 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable no-unused-vars */
 import { options as AcalaOptions } from '@acala-network/api';
 import { formatBalance } from '@polkadot/util';
+import { encodeAddress } from '@polkadot/keyring';
 import constants from '../constants/onchain';
 
 const { WsProvider, ApiPromise, Keyring } = require('@polkadot/api');
@@ -13,6 +15,8 @@ const getSender = async (seed) => {
   const sender = await keyring.addFromUri(seed);
   return sender;
 };
+
+let balancesWithMultipleTokens = [];
 
 // prettier-ignore
 const providerInitialization = async (rpc) => {
@@ -43,7 +47,7 @@ const toUnit = (balance, decimals) => {
 const getBalance = async (api, account) => {
   const tokenLength = await api.registry.chainTokens.length;
   if (tokenLength > 1) {
-    const balance = await getBalanceWithMultipleTokens(api, account);
+    const balance = await setMultipleTokens(api, account);
     return balance;
   }
   const balance = await getBalanceWithSingleToken(api, account);
@@ -59,7 +63,7 @@ const getBalanceWithSingleToken = async (api, acc) => {
   return parseFloat(userBalance);
 };
 
-// Get balance of a chain with multiple tokens
+// Get balance of Native Token of a chain with multiple tokens
 const getBalanceWithMultipleTokens = async (api, account) => {
   const tokenNames = await api.registry.chainTokens;
   const decimals = await api.registry.chainDecimals;
@@ -81,12 +85,101 @@ const getBalanceWithMultipleTokens = async (api, account) => {
   }
 };
 
+const formatNumber = (number, decimals) => {
+  if (number.toString() === '0') return '0';
+  return (Number(number.toString()) / 10 ** decimals).toFixed(5);
+};
+
+const wait = () => {
+  setTimeout(() => {
+    console.log('good');
+  }, 10000);
+};
+
+const getBalanceOfAToken = async (api, account, token, decimals) => {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    await api.query.tokens.accounts(account, { Token: token }, (result) => {
+    // console.log('Result', result);
+      const bal = formatNumber(result.free, decimals);
+      // const bal = formatBalance(result.free, decimals, { forceUnit: '-', withUnit: false });
+      console.log('Bal and token name', token, bal);
+      balancesWithMultipleTokens = balancesWithMultipleTokens.concat({ name: token, balance: bal });
+      console.log('In service balances mu tok', balancesWithMultipleTokens);
+      // wait();
+      return bal;
+    });
+  } catch (err) {
+    throw err;
+  }
+};
+
+const getBalances = () => {
+  return balancesWithMultipleTokens;
+};
+// Get balance of Non Native Tokens of a chain with multiple tokens
+// eslint-disable-next-line consistent-return
+const setMultipleTokens = async (api, account, chainName) => {
+  // balances = [];
+  console.clear();
+  try {
+    console.log('Chain =====>>>', chainName);
+    let allTokens = api.registry.chainTokens;
+    console.log('All tokens', allTokens);
+    const allDecimals = api.registry.chainDecimals;
+
+    if (chainName === 'Karura') {
+      allTokens = allTokens.splice(0, allTokens.length - 2);
+      console.log('All tokens after splice', allTokens);
+    }
+
+    // // eslint-disable-next-line no-re``stricted-syntax
+    // eslint-disable-next-line no-restricted-syntax
+    // for (const singleToken of allTokens) {
+    //   i += 1;
+    //   console.log('iiiii', i);
+    //   // eslint-disable-next-line no-await-in-loop
+    //   const res2 = await getBalanceOfAToken(api, account, singleToken, 10);
+    //   console.log('res2', res2);
+    // }
+
+    allTokens.map((singleToken, i) => {
+      const res = getBalanceOfAToken(api, account, singleToken, allDecimals[i]);
+      return res;
+    });
+    // allTokens.forEach(async (singleToken, i) => {
+    //   const res = await getBalanceOfAToken(api, account, singleToken, allDecimals[i]);
+    //   console.log('Res', res);
+    // });
+    // console.log('Done');
+    // const res = await Promise.all(allTokens.map(async (singleToken, i) => {
+    //   const res2 = await getBalanceOfAToken(api, account, singleToken, allDecimals[i]);
+    //   console.log('Res 2', res2);
+    // }));
+
+    // });
+
+    // return balancesRedux;
+  } catch (err) {
+    console.log('Err', err);
+  }
+};
+
 const getTransactionFee = async (api, sender, recipient, decimalPlaces, amount) => {
+  const amountSending = amount * 10 ** decimalPlaces;
   const info = await api.tx.balances
-    .transfer(sender, amount * 10 ** decimalPlaces)
+    // eslint-disable-next-line no-undef
+    .transfer(sender, BigInt(amountSending))
     .paymentInfo(recipient);
 
   return info;
+};
+
+const addressMapper = (address, prefix) => {
+  console.log(prefix, '||||||', address);
+  const res = encodeAddress(address, prefix);
+  console.log('Result ====>>', res);
+  return res;
 };
 
 export {
@@ -96,4 +189,6 @@ export {
   getSender,
   getTransactionFee,
   toUnit,
+  addressMapper,
+  getBalances,
 };

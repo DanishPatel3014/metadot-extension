@@ -99,9 +99,13 @@ function TxDetails({
           <HorizontalContentDiv marginTop="10px">
 
             <VerticalContentDiv>
+
               <MainText2 textAlign="start" className={mainHeadingfontFamilyClass}>From</MainText2>
+
               <SubText2 textAlign="start" className={subHeadingfontFamilyClass}>
+
                 {addressModifier(accountFrom)}
+
               </SubText2>
             </VerticalContentDiv>
 
@@ -148,7 +152,8 @@ function TxDetails({
                   {`${getTotalBalance(amount, transactionFee)}
                   ${tokenName}`}
                 </MainText2>
-                <MainText2 textAlign="end" className={mainHeadingfontFamilyClass}>$0</MainText2>
+                {/* <MainText2 textAlign="end"
+                className={mainHeadingfontFamilyClass}>$0</MainText2> */}
               </VerticalContentDiv>
             </HorizontalContentDiv>
 

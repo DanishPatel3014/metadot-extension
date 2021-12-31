@@ -45,7 +45,8 @@ const AmountInput = ({
     fontSize: '14px',
     height: '25px',
     onBlur: amountIsValidHandler,
-    isCorrect: amountState.isValid || insufficientBal,
+    isCorrect: amountState.isValid,
+    //  || insufficientBal,
   };
 
   const balanceProps = {

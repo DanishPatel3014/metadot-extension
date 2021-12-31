@@ -19,6 +19,7 @@ const {
   ASTAR_CONFIG,
   MOONBASE_CONFIG,
   ASGARD_CONFIG,
+  SHIBUYA_CONFIG,
 } = constants;
 
 const availableNetworks = [
@@ -27,6 +28,7 @@ const availableNetworks = [
     theme: POLKADOT_CONFIG.LOGO,
     moreOptions: false,
     rpcUrl: POLKADOT_CONFIG.RPC_URL,
+    prefix: 0,
   },
   {
     name: 'Kusama Main Networks',
@@ -65,7 +67,7 @@ const BetaNetworks = [
     mainNetwork: true,
     testNet: null,
     rpcUrl: ASTAR_CONFIG.RPC_URL,
-    disabled: true,
+    disabled: false,
     tokenName: 'Kusama',
   },
 ];
@@ -80,6 +82,7 @@ const KusamaMainNetworks = [
     rpcUrl: KUSAMA_CONFIG.RPC_URL,
     disabled: false,
     tokenName: KUSAMA_CONFIG.TOKEN_NAME,
+    prefix: 2,
   },
   {
     name: KARURA_CONFIG.CHAIN_NAME,
@@ -129,12 +132,14 @@ const TestNetworks = [
     theme: WESTEND_CONFIG.LOGO,
     rpcUrl: WESTEND_CONFIG.RPC_URL,
     tokenName: WESTEND_CONFIG.TOKEN_NAME,
+    prefix: 42,
   },
   {
     name: ROCOCO_CONFIG.CHAIN_NAME,
     theme: ROCOCO_CONFIG.LOGO,
     rpcUrl: ROCOCO_CONFIG.RPC_URL,
     tokenName: ROCOCO_CONFIG.TOKEN_NAME,
+    prefix: 42,
     // disabled: false,
   },
   {
@@ -142,6 +147,7 @@ const TestNetworks = [
     theme: ACALA_MANDALA_CONFIG.LOGO,
     rpcUrl: ACALA_MANDALA_CONFIG.RPC_URL,
     tokenName: ACALA_MANDALA_CONFIG.TOKEN_NAME,
+    prefix: 42,
   },
   {
     name: DUSTY_CONFIG.CHAIN_NAME,
@@ -149,6 +155,15 @@ const TestNetworks = [
     disabled: false,
     rpcUrl: DUSTY_CONFIG.RPC_URL,
     tokenName: DUSTY_CONFIG.TOKEN_NAME,
+    prefix: 5,
+  },
+  {
+    name: SHIBUYA_CONFIG.CHAIN_NAME,
+    theme: SHIBUYA_CONFIG.LOGO,
+    disabled: false,
+    rpcUrl: SHIBUYA_CONFIG.RPC_URL,
+    tokenName: SHIBUYA_CONFIG.TOKEN_NAME,
+    prefix: 5,
   },
   {
     name: MOONBASE_CONFIG.CHAIN_NAME,

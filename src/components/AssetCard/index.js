@@ -31,6 +31,7 @@ function AssetCard({
     disabled: !!apiInitializationStarts,
   };
 
+  console.log('here asset card', name, amount);
   return (
     <AssetCardWrapper id="asset-card">
       <HorizontalContentDiv>

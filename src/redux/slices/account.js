@@ -16,6 +16,7 @@ const initialState = {
   balance: 0,
   balanceInUsd: 0,
   keyringInitialized: false,
+  balances: [],
 };
 
 export const accountSlice = createSlice({
@@ -67,6 +68,15 @@ export const accountSlice = createSlice({
     setBalanceInUsd: (state, action) => {
       state.balanceInUsd = action.payload;
     },
+    // setBalances: (state, action) => ({
+    //   // state.balances = action.payload;
+    //   ...state,
+    //   balances: [...state.balances, action.payload],
+    // }),
+    setBalances: (state, action) => {
+      console.log('Bye Action payload ====>>>>', action.payload);
+      state.balances = action.payload;
+    },
   },
 });
 
@@ -84,6 +94,7 @@ export const {
   setBalanceInUsd,
   deleteRedux,
   setKeyringInitialized,
+  setBalances,
 } = accountSlice.actions;
 
 export default accountSlice.reducer;

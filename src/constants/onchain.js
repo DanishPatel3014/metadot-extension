@@ -14,6 +14,7 @@ import westendColour from '../assets/images/tokenImg/westend_colour.svg';
 import acala from '../assets/images/tokenImg/acala-circle.svg';
 import rococoIcon from '../assets/images/rococo.svg';
 import astarIcon from '../assets/images/astar.png';
+import shibuyaIcon from '../assets/images/shibuya.png';
 
 const USD_PER_POLKADOT_API = 'https://api.coingecko.com/api/v3/simple/price?ids=POLKADOT&vs_currencies=Usd';
 
@@ -25,6 +26,7 @@ const POLKADOT_CONFIG = {
   LOGO: polkadotDot,
   RPC_URL: 'wss://rpc.polkadot.io',
   EXISTENTIAL_DEPOSIT: 1,
+  PREFIX: 0,
 };
 
 const KUSAMA_CONFIG = {
@@ -33,11 +35,12 @@ const KUSAMA_CONFIG = {
   LOGO: KusamaIcon,
   RPC_URL: 'wss://kusama-rpc.polkadot.io',
   EXISTENTIAL_DEPOSIT: 0.0000333333,
+  PREFIX: 2,
 };
 
 const KARURA_CONFIG = {
   CHAIN_NAME: 'Karura',
-  TOKEN_NAME: '',
+  TOKEN_NAME: 'KAR',
   LOGO: KaruraIcon,
   RPC_URL: 'wss://karura-rpc-0.aca-api.network',
 };
@@ -82,6 +85,7 @@ const WESTEND_CONFIG = {
   TOKEN_NAME: 'WND',
   LOGO: westendColour,
   RPC_URL: 'wss://westend-rpc.polkadot.io',
+  PREFIX: 42,
 };
 
 const ROCOCO_CONFIG = {
@@ -89,13 +93,17 @@ const ROCOCO_CONFIG = {
   TOKEN_NAME: 'ROC',
   LOGO: rococoIcon,
   RPC_URL: 'wss://rococo-rpc.polkadot.io',
+  PREFIX: 42,
 };
 
 const ACALA_MANDALA_CONFIG = {
   CHAIN_NAME: 'Acala Mandala',
   TOKEN_NAME: 'ACA',
   LOGO: acala,
-  RPC_URL: 'wss://acala-mandala.api.onfinality.io/public-ws',
+  RPC_URL:
+  //  'wss://acala-mandala.api.onfinality.io/public-ws',
+  'wss://rpc.pinknode.io/mandala/explorer',
+  PREFIX: 42,
 };
 
 const MOONBASE_CONFIG = {
@@ -117,13 +125,33 @@ const DUSTY_CONFIG = {
   TOKEN_NAME: 'PLD',
   LOGO: dusty,
   RPC_URL: 'wss://rpc.dusty.plasmnet.io/',
+  PREFIX: 5,
 };
 
 const ASTAR_CONFIG = {
   CHAIN_NAME: 'Astar',
-  TOKEN_NAME: 'PLM',
+  TOKEN_NAME: 'ASTR',
   LOGO: astarIcon,
-  RPC_URL: 'wss://rpc.plasmnet.io/',
+  RPC_URL: 'wss://rpc.astar.network/',
+  PREFIX: 5,
+};
+
+const SHIBUYA_CONFIG = {
+  CHAIN_NAME: 'Shibuya',
+  TOKEN_NAME: 'SBY',
+  LOGO: shibuyaIcon,
+  RPC_URL: 'wss://rpc.shibuya.astar.network',
+  // https://rpc.shibuya.astar.network:8545
+  PREFIX: 5,
+
+  // rpc url's
+  // wss://shibuya.eusko.in
+  // wss://shibuya1.eusko.in
+  // wss://shibuya2.eusko.in
+
+  // SCAN
+  // https://shibuya.subscan.io
+
 };
 
 export default {
@@ -144,4 +172,5 @@ export default {
   MOONBASE_CONFIG,
   ASGARD_CONFIG,
   KHALA_CONFIG,
+  SHIBUYA_CONFIG,
 };

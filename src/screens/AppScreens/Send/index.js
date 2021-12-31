@@ -35,6 +35,7 @@ const { Keyring } = require('@polkadot/api');
 
 const { decodeAddress, encodeAddress } = require('@polkadot/keyring');
 const { hexToU8a, isHex } = require('@polkadot/util');
+const BN = require('../../../utils/bn');
 
 const errorMessages = {
   invalidAddress: 'Invalid address',
@@ -179,6 +180,9 @@ const Send = () => {
     if (currentUser.account.tokenName === 'DOT') {
       return (splitFee[0] * 10 ** -3).toFixed(4);
     }
+    if (currentUser.account.tokenName === 'SBY') {
+      return (splitFee[0] * 10 ** -3).toFixed(4);
+    }
     return true;
   };
 
@@ -264,58 +268,109 @@ const Send = () => {
   };
 
   const doTransaction = async (deSeed) => {
-    console.clear();
-    const keyring = new Keyring({ type: 'sr25519' });
+    try {
+      console.clear();
+      const keyring = new Keyring({ type: 'sr25519' });
 
-    const decimalPlaces = await api.registry.chainDecimals;
-    console.log('b');
-    setLoading2(true);
-    console.log('c');
-    const sender = keyring.addFromUri(deSeed);
-    data.operation = 'Send';
-    const decimals = decimalPlaces.length > 1
-      ? decimalPlaces[0] : decimalPlaces;
+      const decimalPlaces = await api.registry.chainDecimals;
+      console.log('b');
+      setLoading2(true);
+      console.log('c');
+      const sender = keyring.addFromUri(deSeed);
+      data.operation = 'Send';
+      const decimals = decimalPlaces.length > 1
+        ? decimalPlaces[0] : decimalPlaces;
+      console.log('Decimals', decimals);
+      const amountSending = amountState.value * 10 ** decimals;
+      // eslint-disable-next-line no-undef
+      console.log('Amount sending', BigInt(amountSending));
+      // console.log('Amount sending into BN [][] ...', new BN(amountSending));
 
-    const tx = currentUser.api.api.tx.balances
-      .transfer(
-        accountToSate.value, amountState.value * 10 ** decimals,
-      );
+      const tx = currentUser.api.api.tx.balances
+        .transfer(
+        // eslint-disable-next-line no-undef
+          accountToSate.value, BigInt(amountSending),
+        );
 
-    // const result = await transfer.signAndSend(
-    //   sender, ({ status, events, dispatchError }) => {
-    //     if (status.isInBlock) {
-    //       if (dispatchError) {
-    //         if (dispatchError.isModule) {
-    //           alert('Tx failed');
-    //           // for module errors, we have the section indexed, lookup
-    //           const decoded = api.registry.findMetaError(dispatchError.asModule);
-    //           const { docs, name, section } = decoded;
+      // const result = await transfer.signAndSend(
+      //   sender, ({ status, events, dispatchError }) => {
+      //     if (status.isInBlock) {
+      //       if (dispatchError) {
+      //         if (dispatchError.isModule) {
+      //           alert('Tx failed');
+      //           // for module errors, we have the section indexed, lookup
+      //           const decoded = api.registry.findMetaError(dispatchError.asModule);
+      //           const { docs, name, section } = decoded;
 
-    //           console.log(`${section}.${name}: ${docs.join(' ')}`);
-    //         } else {
-    //         // Other, CannotLookup, BadOrigin, no extra info
-    //           console.log(dispatchError.toString());
-    //         }
-    //       } else {
-    //         alert('Tx successfull');
-    //         console.log('Tx successfull');
-    //       }
-    //     }
-    //   },
-    // );
+      //           console.log(`${section}.${name}: ${docs.join(' ')}`);
+      //         } else {
+      //         // Other, CannotLookup, BadOrigin, no extra info
+      //           console.log(dispatchError.toString());
+      //         }
+      //       } else {
+      //         alert('Tx successfull');
+      //         console.log('Tx successfull');
+      //       }
+      //     }
+      //   },
+      // );
 
-    const result = await tx.signAndSend(sender, ({ status, events }) => {
+      console.log('Amount sending .....', amountState.value * 10 ** decimals);
+      const result = tx.signAndSend(sender, ({ status, events }) => {
       // if (status.isInBlock) txStatus = status.isInBlock;
-      const txResSuccess = events
-        .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
-      const txResFail = events
-        .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
-      console.log('Tx res Success', txResSuccess.length);
-      console.log('Tx res Fail', txResFail.length);
-      if (status.isInBlock) {
-        data.hash = tx.hash.toHex();
-        if (txResFail.length >= 1) {
-          console.log('Tx failed', txResFail.length);
+        const txResSuccess = events
+          .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
+        const txResFail = events
+          .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
+        console.log('Tx res Success', txResSuccess.length);
+        console.log('Tx res Fail', txResFail.length);
+        if (status.isInBlock) {
+          console.log('Tx hash', tx.hash.toHex());
+          data.hash = tx.hash.toHex();
+          if (txResFail.length >= 1) {
+            console.log('Tx failed', txResFail.length);
+            data.status = 'Failed';
+            dispatch(addTransaction(data));
+            setLoading2(false);
+            dispatch(setConfirmSendModal(false));
+            dispatch(setIsSuccessModalOpen(true));
+            setIsSendModalOpen(false);
+            dispatch(setMainTextForSuccessModal('Transaction Failed!'));
+            dispatch(
+              setSubTextForSuccessModal(''),
+            );
+            setTimeout(() => {
+              dispatch(setIsSuccessModalOpen(false));
+            }, 4000);
+            // navigate to dashboard on success
+            history.push('/');
+          } if (txResSuccess.length >= 1) {
+            console.log('Tx successfull');
+            data.status = 'Successful';
+            dispatch(addTransaction(data));
+            setLoading2(false);
+            setIsSendModalOpen(false);
+            dispatch(setMainTextForSuccessModal('Transaction Successful!'));
+            dispatch(
+              setSubTextForSuccessModal(''),
+            );
+            dispatch(setIsSuccessModalOpen(true));
+            setTimeout(() => {
+              dispatch(setIsSuccessModalOpen(false));
+            }, 4000);
+            history.push('/');
+          }
+        }
+      })
+        .then((res) => {
+          console.log('Res', res);
+        // console.log('Result .....', result);
+        })
+        .catch((err) => {
+        // console.log('Tx hash', tx.hash.toHex());
+          data.hash = tx.hash.toHex();
+          alert('Tx failed');
+          console.log('Error', err);
           data.status = 'Failed';
           dispatch(addTransaction(data));
           setLoading2(false);
@@ -331,215 +386,179 @@ const Send = () => {
           }, 4000);
           // navigate to dashboard on success
           history.push('/');
-        } if (txResSuccess.length >= 1) {
-          console.log('Tx successfull');
-          data.status = 'Successful';
-          dispatch(addTransaction(data));
-          setLoading2(false);
-          setIsSendModalOpen(false);
-          dispatch(setMainTextForSuccessModal('Transaction Successful!'));
-          dispatch(
-            setSubTextForSuccessModal(''),
-          );
-          dispatch(setIsSuccessModalOpen(true));
-          setTimeout(() => {
-            dispatch(setIsSuccessModalOpen(false));
-          }, 4000);
-          history.push('/');
-        }
-      }
-    })
-      .then((res) => {
-        console.log('Res', res);
-      })
-      .catch((err) => {
-        console.log('Tx hash', tx.hash.toHex());
-        data.hash = tx.hash.toHex();
-        alert('Tx failed');
-        console.log('Error', err);
-        data.status = 'Failed';
-        dispatch(addTransaction(data));
-        setLoading2(false);
-        dispatch(setConfirmSendModal(false));
-        dispatch(setIsSuccessModalOpen(true));
-        setIsSendModalOpen(false);
-        dispatch(setMainTextForSuccessModal('Transaction Failed!'));
-        dispatch(
-          setSubTextForSuccessModal(''),
-        );
-        setTimeout(() => {
-          dispatch(setIsSuccessModalOpen(false));
-        }, 4000);
-        // navigate to dashboard on success
-        history.push('/');
-      });
-    // const txResSuccess = events
-    //   .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
-    // const txResFail = events
-    //   .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
-    // console.log('Tx res Success', txResSuccess.length);
-    // console.log('Tx res Fail', txResFail.length);
-    // console.log('Dispatch error', dispatchError);
-    // if (status.isInBlock) {
-    //   console.log('Hash of tx', tx.hash.toHex());
-    //   data.hash = tx.hash.toHex();
-    //   if (dispatchError) {
-    //     data.status = 'Failed';
-    //     dispatch(addTransaction(data));
-    //     setLoading2(false);
-    //     dispatch(setConfirmSendModal(false));
-    //     dispatch(setIsSuccessModalOpen(true));
-    //     setIsSendModalOpen(false);
-    //     dispatch(setMainTextForSuccessModal('Transaction Failed!'));
-    //     dispatch(
-    //       setSubTextForSuccessModal(''),
-    //     );
-    //     setTimeout(() => {
-    //       dispatch(setIsSuccessModalOpen(false));
-    //     }, 3500);
-    //     // navigate to dashboard on success
-    //     history.push('/');
-    //     // if (dispatchError.isModule) {
-    //   alert('Tx failed');
-    //   // for module errors, we have the section indexed, lookup
-    //   const decoded = api.registry.findMetaError(dispatchError.asModule);
-    //   const { docs, name, section } = decoded;
+        });
+      console.log('Result [][]', result);
+      // const txResSuccess = events
+      //   .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
+      // const txResFail = events
+      //   .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
+      // console.log('Tx res Success', txResSuccess.length);
+      // console.log('Tx res Fail', txResFail.length);
+      // console.log('Dispatch error', dispatchError);
+      // if (status.isInBlock) {
+      //   console.log('Hash of tx', tx.hash.toHex());
+      //   data.hash = tx.hash.toHex();
+      //   if (dispatchError) {
+      //     data.status = 'Failed';
+      //     dispatch(addTransaction(data));
+      //     setLoading2(false);
+      //     dispatch(setConfirmSendModal(false));
+      //     dispatch(setIsSuccessModalOpen(true));
+      //     setIsSendModalOpen(false);
+      //     dispatch(setMainTextForSuccessModal('Transaction Failed!'));
+      //     dispatch(
+      //       setSubTextForSuccessModal(''),
+      //     );
+      //     setTimeout(() => {
+      //       dispatch(setIsSuccessModalOpen(false));
+      //     }, 3500);
+      //     // navigate to dashboard on success
+      //     history.push('/');
+      //     // if (dispatchError.isModule) {
+      //   alert('Tx failed');
+      //   // for module errors, we have the section indexed, lookup
+      //   const decoded = api.registry.findMetaError(dispatchError.asModule);
+      //   const { docs, name, section } = decoded;
 
-    //   console.log(`${section}.${name}: ${docs.join(' ')}`);
-    // } else {
-    //   // Other, CannotLookup, BadOrigin, no extra info
-    //   console.log('T', dispatchError.toString());
-    // }
-    //     } else {
-    //       alert('Tx successfull');
-    //       console.log('Tx successfull');
-    //       data.status = 'Successful';
-    //       dispatch(addTransaction(data));
-    //       setLoading2(false);
-    //       setIsSendModalOpen(false);
-    //       dispatch(setMainTextForSuccessModal('Transaction Successful!'));
-    //       dispatch(
-    //         setSubTextForSuccessModal(''),
-    //       );
-    //       dispatch(setIsSuccessModalOpen(true));
-    //       setTimeout(() => {
-    //         dispatch(setIsSuccessModalOpen(false));
-    //       }, 3500);
-    //       history.push('/');
-    //     }
-    //   }
-    // });
-    // .then((res) => console.log('Res', res)
-    // .catch((err) => console.log('Error', err))
-    //   .then((res) => console.log('In then res ===>>>', res.toHex()))
-    //   .catch((err) => console.log('In catch error ====>>>>', err));
-    // console.log('Result', result);
-    // async ({ status, events }) => {
-    //   console.log('Status', status.isInBlock, status.isFinalized);
-    //   console.log('Events [][]', events);
+      //   console.log(`${section}.${name}: ${docs.join(' ')}`);
+      // } else {
+      //   // Other, CannotLookup, BadOrigin, no extra info
+      //   console.log('T', dispatchError.toString());
+      // }
+      //     } else {
+      //       alert('Tx successfull');
+      //       console.log('Tx successfull');
+      //       data.status = 'Successful';
+      //       dispatch(addTransaction(data));
+      //       setLoading2(false);
+      //       setIsSendModalOpen(false);
+      //       dispatch(setMainTextForSuccessModal('Transaction Successful!'));
+      //       dispatch(
+      //         setSubTextForSuccessModal(''),
+      //       );
+      //       dispatch(setIsSuccessModalOpen(true));
+      //       setTimeout(() => {
+      //         dispatch(setIsSuccessModalOpen(false));
+      //       }, 3500);
+      //       history.push('/');
+      //     }
+      //   }
+      // });
+      // .then((res) => console.log('Res', res)
+      // .catch((err) => console.log('Error', err))
+      //   .then((res) => console.log('In then res ===>>>', res.toHex()))
+      //   .catch((err) => console.log('In catch error ====>>>>', err));
+      // console.log('Result', result);
+      // async ({ status, events }) => {
+      //   console.log('Status', status.isInBlock, status.isFinalized);
+      //   console.log('Events [][]', events);
 
-    // const txResSuccess = events
-    //   .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
-    // const txResFail = events
-    //   .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
-    // console.log('Tx res Success', txResSuccess.length);
+      // const txResSuccess = events
+      //   .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
+      // const txResFail = events
+      //   .filter(({ event }) => api.events.system.ExtrinsicFailed.is(event));
+      // console.log('Tx res Success', txResSuccess.length);
 
-    // if (status.isInBlock || status.isFinalized) {
-    //   events
-    //     .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event))
-    //     .forEach(async ({ event }) => {
-    //       console.log('Transaction success');
-    //       console.log('Event', event);
-    //       if (status.isInBlock) {
-    //         console.log('Hash of TX', status.asInBlock.toString());
-    //         data.hash = status.asInBlock.toString();
-    //       }
-    //     });
+      // if (status.isInBlock || status.isFinalized) {
+      //   events
+      //     .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event))
+      //     .forEach(async ({ event }) => {
+      //       console.log('Transaction success');
+      //       console.log('Event', event);
+      //       if (status.isInBlock) {
+      //         console.log('Hash of TX', status.asInBlock.toString());
+      //         data.hash = status.asInBlock.toString();
+      //       }
+      //     });
 
-    // navigate to dashboard on success
+      // navigate to dashboard on success
 
-    // if (txResSuccess.length >= 1) {
-    //   try {
-    //     console.log('Tx is successfull');
-    //     data.status = 'Successful';
-    //     dispatch(addTransaction(data));
-    //     setLoading2(false);
-    //     setIsSendModalOpen(false);
-    //     dispatch(setMainTextForSuccessModal('Transaction Successful!'));
-    //     dispatch(
-    //       setSubTextForSuccessModal(''),
-    //     );
-    //     dispatch(setIsSuccessModalOpen(true));
-    //     setTimeout(() => {
-    //       dispatch(setIsSuccessModalOpen(false));
-    //     }, 3500);
-    //     history.push('/');
-    //   } catch (err) {
-    //     console.log('successfull block ran second time error---', err);
-    //   }
-    // } else if (txResFail.length >= 1) {
-    //   data.status = 'Failed';
-    //   console.log('Tx is failed');
-    //   alert('Transaction failed');
-    //   dispatch(addTransaction(data));
-    //   setLoading2(false);
-    //   dispatch(setConfirmSendModal(false));
-    //   dispatch(setIsSuccessModalOpen(true));
-    //   dispatch(setMainTextForSuccessModal('Transaction Failed!'));
-    //   dispatch(
-    //     setSubTextForSuccessModal(''),
-    //   );
-    //   setTimeout(() => {
-    //     dispatch(setIsSuccessModalOpen(false));
-    //   }, 3500);
-    //   // navigate to dashboard on success
-    //   history.push('/');
-    // }
-    // },
-    // ).then((res) => console.log('Res', res.toHex()))
-    //   .catch((err) => console.log('Error', err));
+      // if (txResSuccess.length >= 1) {
+      //   try {
+      //     console.log('Tx is successfull');
+      //     data.status = 'Successful';
+      //     dispatch(addTransaction(data));
+      //     setLoading2(false);
+      //     setIsSendModalOpen(false);
+      //     dispatch(setMainTextForSuccessModal('Transaction Successful!'));
+      //     dispatch(
+      //       setSubTextForSuccessModal(''),
+      //     );
+      //     dispatch(setIsSuccessModalOpen(true));
+      //     setTimeout(() => {
+      //       dispatch(setIsSuccessModalOpen(false));
+      //     }, 3500);
+      //     history.push('/');
+      //   } catch (err) {
+      //     console.log('successfull block ran second time error---', err);
+      //   }
+      // } else if (txResFail.length >= 1) {
+      //   data.status = 'Failed';
+      //   console.log('Tx is failed');
+      //   alert('Transaction failed');
+      //   dispatch(addTransaction(data));
+      //   setLoading2(false);
+      //   dispatch(setConfirmSendModal(false));
+      //   dispatch(setIsSuccessModalOpen(true));
+      //   dispatch(setMainTextForSuccessModal('Transaction Failed!'));
+      //   dispatch(
+      //     setSubTextForSuccessModal(''),
+      //   );
+      //   setTimeout(() => {
+      //     dispatch(setIsSuccessModalOpen(false));
+      //   }, 3500);
+      //   // navigate to dashboard on success
+      //   history.push('/');
+      // }
+      // },
+      // ).then((res) => console.log('Res', res.toHex()))
+      //   .catch((err) => console.log('Error', err));
 
-    // .then((res, status, events) => {
-    //   console.log('The transaction Hash', res.toHex());
-    //   console.log('Status:', status);
-    //   console.log('events:', events);
-    //   alert('Tx successfull');
-    //   console.log('Tx is successfull');
-    //   data.status = 'Successful';
-    //   // data.hash = res.toHex();
-    //   dispatch(addTransaction(data));
-    //   setLoading2(false);
-    //   setIsSendModalOpen(false);
-    //   dispatch(setMainTextForSuccessModal('Transaction Successful!'));
-    //   dispatch(
-    //     setSubTextForSuccessModal(''),
-    //   );
-    //   dispatch(setConfirmSendModal(false));
-    //   dispatch(setIsSuccessModalOpen(true));
-    //   setTimeout(() => {
-    //     dispatch(setIsSuccessModalOpen(false));
-    //   }, 3500);
-    //   history.push('/');
-    // })
-    // .catch((err) => {
-    //   data.status = 'Failed';
-    //   console.error('Error [][][]', err);
-    //   alert('Transaction failed');
-    //   dispatch(addTransaction(data));
-    //   setLoading2(false);
-    //   dispatch(setConfirmSendModal(false));
-    //   dispatch(setIsSuccessModalOpen(true));
-    //   dispatch(setMainTextForSuccessModal('Transaction Failed!'));
-    //   dispatch(
-    //     setSubTextForSuccessModal(''),
-    //   );
-    //   setTimeout(() => {
-    //     dispatch(setIsSuccessModalOpen(false));
-    //   }, 3500);
-    // // navigate to dashboard on failed
-    // // history.push('/');
-    // });
-    // console.log('Hash', hash);
+      // .then((res, status, events) => {
+      //   console.log('The transaction Hash', res.toHex());
+      //   console.log('Status:', status);
+      //   console.log('events:', events);
+      //   alert('Tx successfull');
+      //   console.log('Tx is successfull');
+      //   data.status = 'Successful';
+      //   // data.hash = res.toHex();
+      //   dispatch(addTransaction(data));
+      //   setLoading2(false);
+      //   setIsSendModalOpen(false);
+      //   dispatch(setMainTextForSuccessModal('Transaction Successful!'));
+      //   dispatch(
+      //     setSubTextForSuccessModal(''),
+      //   );
+      //   dispatch(setConfirmSendModal(false));
+      //   dispatch(setIsSuccessModalOpen(true));
+      //   setTimeout(() => {
+      //     dispatch(setIsSuccessModalOpen(false));
+      //   }, 3500);
+      //   history.push('/');
+      // })
+      // .catch((err) => {
+      //   data.status = 'Failed';
+      //   console.error('Error [][][]', err);
+      //   alert('Transaction failed');
+      //   dispatch(addTransaction(data));
+      //   setLoading2(false);
+      //   dispatch(setConfirmSendModal(false));
+      //   dispatch(setIsSuccessModalOpen(true));
+      //   dispatch(setMainTextForSuccessModal('Transaction Failed!'));
+      //   dispatch(
+      //     setSubTextForSuccessModal(''),
+      //   );
+      //   setTimeout(() => {
+      //     dispatch(setIsSuccessModalOpen(false));
+      //   }, 3500);
+      // // navigate to dashboard on failed
+      // // history.push('/');
+      // });
+      // console.log('Hash', hash);
+    } catch (err) {
+      console.log('Error', err);
+      throw err;
+    }
   };
 
   const sendTransaction = async (deSeed) => {
@@ -690,6 +709,7 @@ const Send = () => {
     try {
       setLoading1(true);
       const decimalPlaces = await api.registry.chainDecimals;
+      console.log('Decimal places', decimalPlaces);
       console.log('Before validate tx errors');
       await validateTxErrors();
       console.log('After validate tx errors');
@@ -698,12 +718,9 @@ const Send = () => {
       const info = await
       getTransactionFee(api, currentUser.account.publicKey,
         accountToSate.value, decimalPlaces, amountState.value);
-      // const info = await api.tx.balances
-      //   .transfer(currentUser.account.publicKey, amountState.value * 10 ** decimalPlaces)
-      //   .paymentInfo(accountToSate.value);
-
       console.log('After info');
       const txFee = await convertTransactionFee(info.partialFee.toHuman());
+      // const txFee = 1;
       console.log('After tx');
       console.log('TX fee', txFee);
       data.txFee = txFee;
@@ -715,6 +732,7 @@ const Send = () => {
         setInsufficientBal(true);
         console.log('hello');
       } else {
+        console.log('Open password modal');
         dispatch(setConfirmSendModal(true));
       }
     } catch (err) {

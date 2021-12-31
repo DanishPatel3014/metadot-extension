@@ -45,6 +45,7 @@ function shuffleItemsWithinArray(array) {
 }
 
 function addressModifier(address) {
+  console.log('Address', address);
   if (address) return `${address.slice(0, 5)}...${address.slice(address.length - 5, address.length)}`;
   return null;
 }
@@ -86,11 +87,11 @@ function isUserNameValid(username) {
   return valid;
 }
 
-const trimBalance = (value) => {
-  const val = value.toString();
-  const trimmedValue = val.slice(0, (val.indexOf('.')) + 4);
-  return trimmedValue;
-};
+// eslint-disable-next-line no-unused-vars
+const trimBalance = (value) => 1;
+// const val = value.toString();
+// const trimmedValue = val.slice(0, (val.indexOf('.')) + 4);
+// return trimmedValue;
 
 async function getKSM() {
   let amm;

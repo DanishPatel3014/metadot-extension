@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@acala-network/api": "^3.0.1",
+    "@acala-network/sdk-core": "^3.0.2",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@material-ui/core": "^4.12.3",
@@ -21,7 +22,10 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "babel-eslint": "^10.1.0",
+    "blakejs": "^1.1.1",
+    "bs58": "^4.0.1",
     "encrypt-with-password": "^1.0.0",
+    "ethers": "^5.5.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-redux": "^7.2.5",
