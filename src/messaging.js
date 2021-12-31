@@ -59,3 +59,7 @@ export async function createAccountSuri(name, password, suri,
     genesisHash, name, password, suri, type,
   });
 }
+
+export async function exportAccount(address, password) {
+  return sendMessage('pri(accounts.export)', { address, password });
+}

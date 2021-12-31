@@ -14,6 +14,7 @@ import {
 } from './styledComponent';
 import { WarningText } from '../..';
 import { setAuthScreenModal, setConfirmSendModal } from '../../../redux/slices/modalHandling';
+import { exportAccount } from '../../../messaging';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { decrypt } = accounts;
@@ -29,15 +30,22 @@ function AuthModal({
   const [passwordError, setPasswordError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!password) {
       return false;
     }
     try {
-      const sender = keyring.getPair(currentUser.publicKey);
-      console.log('sender =>>', sender);
-      const unlockedSender = sender.unlock(password);
-      console.log('sender unlocked =>>', unlockedSender);
+      // const sender = keyring.getPair(currentUser.publicKey);
+      // console.log('sender =>>', sender);
+      // const unlockedSender = sender.unlock(password);
+      // console.log('sender unlocked =>>', unlockedSender);
+
+      const accountJson = await exportAccount(currentUser.publicKey, password);
+      console.log('sender json', accountJson.exportedJson);
+      const sender = keyring.createFromJson(accountJson.exportedJson);
+      console.log('sender locked', sender);
+      sender.unlock(password);
+      console.log('sender unlocked', sender);
 
       // const dSeed = decrypt(currentUser.seed, password);
       console.log('Correct');
@@ -45,7 +53,7 @@ function AuthModal({
       dispatch(setConfirmSendModal(true));
       sendTransaction(sender);
     } catch (err) {
-      console.log('error due to wrong ', err);
+      console.log('error due to wrong handle sumbit ', err);
       // alert('Password does not match');
       setPasswordError('Invalid password!');
     }
