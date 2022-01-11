@@ -32,6 +32,7 @@ function AssetsAndTransactions({
   const assetsData = useSelector((state) => state.account);
   const {
     chainName, tokenName, balance, balanceInUsd,
+    balances,
   } = assetsData;
   const [isTab1Active, setIsTab1Active] = useState(true);
   const [isTab2Active, setIsTab2Active] = useState(false);
@@ -75,6 +76,7 @@ function AssetsAndTransactions({
     },
   };
 
+  console.log('Assets data here', assetsData);
   return (
     <AssetsAndTransactionsWrapper>
       <Tabs>
@@ -87,13 +89,19 @@ function AssetsAndTransactions({
       </Tabs>
       <div className="scrollbar">
         {isTab1Active && (
-        <AssetCard
-          name={chainName}
-          shortName={tokenName}
-          amount={(trimBalance(balance))}
-          amountInUsd={balanceInUsd}
-          logo={logoChangeHandler(tokenName)}
-        />
+          balances.map((singleToken, i) => (
+            // eslint-disable-next-line react/jsx-key
+            <AssetCard
+              name={chainName}
+              shortName={singleToken.name}
+              // amount={(trimBalance(singleToken.balance))}
+              amount={singleToken.balance}
+              amountInUsd={balanceInUsd}
+              logo={logoChangeHandler(tokenName)}
+              isNative={singleToken.isNative}
+            />
+          ))
+
         )}
         {isTab2Active && (
         // eslint-disable-next-line arrow-body-style

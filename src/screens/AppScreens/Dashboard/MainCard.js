@@ -3,7 +3,7 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable no-unused-vars */
 /* eslint import/no-cycle: [2, { maxDepth: 1 }] */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { styled } from '@mui/material/styles';
@@ -30,11 +30,13 @@ const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { primaryTextColor } = colors;
 
 function MainCard({
-  balance, address, tokenName, balanceInUsd, accountName,
+  balances, address, tokenName, balanceInUsd, accountName,
 }) {
+  const currentUser = useSelector((state) => state);
   const [open, setOpen] = useState(false);
   const [copy, setCopy] = useState('Copy');
-  const [copyBalance, setCopyBalance] = useState(balance);
+  // const [copyBalance, setCopyBalance] = useState(1);
+  const [nativeBalance, setNativeBalance] = useState(0);
 
   const dispatch = useDispatch();
   const { apiInitializationStarts } = useSelector((state) => state.api);
@@ -71,6 +73,20 @@ function MainCard({
   const addTooltipText = {
     className: 'topTooltiptext',
   };
+
+  useEffect(() => {
+    // console.clear();
+    console.log('Main card', balances);
+    console.log('Current user', currentUser);
+    balances.map((singleToken) => {
+      if (singleToken.isNative) {
+        console.log('Single token balance', singleToken.balance);
+        setNativeBalance(singleToken.balance);
+        return singleToken.balance;
+      }
+      return null;
+    });
+  });
 
   return (
     <MainPanel>
@@ -114,11 +130,11 @@ function MainCard({
             <Balance id="balance" className={mainHeadingfontFamilyClass}>
               <div className={`topTooltip ${mainHeadingfontFamilyClass}`}>
                 <span id="trim-balance">
-                  {trimBalance(balance)}
+                  { trimBalance(nativeBalance)}
                 </span>
                 <span id="token-name" style={{ marginLeft: 7 }}>{tokenName}</span>
                 <span id="complete-balance" {...addTooltipText}>
-                  {balance}
+                  {nativeBalance}
                 </span>
               </div>
             </Balance>

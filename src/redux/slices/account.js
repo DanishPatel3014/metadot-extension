@@ -77,6 +77,40 @@ export const accountSlice = createSlice({
       console.log('Bye Action payload ====>>>>', action.payload);
       state.balances = action.payload;
     },
+
+    updateSingleTokenBalance: (state, action) => ({
+      ...state, // Returns the current state
+      // eslint-disable-next-line max-len
+      balances: state.balances.map((balance) => (balance.name === action.payload.name // Loop through the array to find the post you want to modify
+        // eslint-disable-next-line max-len
+        ? { ...balance, balance: action.payload.balance } : balance)),
+    }),
+    // updateSingleBalance: (state, action) => {
+    //   // state.balances.push(action.payload);
+    //   console.log('Action', action.payload);
+    //   console.log('State', state.balances);
+    //   // eslint-disable-next-line array-callback-return
+    //   let index;
+    //   state.balances.map((balance, i) => {
+    //     if (balance.name === action.payload.name) {
+    //       index = i;
+    //     }
+    //     return 10;
+    //   });
+    //   const newData = { data: state.balances[index] };
+    //   console.log('New data', newData.data);
+    //   // const newArray = JSON.parse(JSON.stringify(state.balances));
+
+    //   // newArray[index].balance = action.payload.balance;
+    //   // // const index = state.balances.
+    // findIndex(balance => balance.name !== action.payload.name)
+    //   console.log('Index here', state.balances[index]);
+    //   // newArray[index].balance = action.payload.balance;
+    //   // return {
+    //   //   ...state,
+    //   //   balances: newArray,
+    //   // };
+    // },
   },
 });
 
@@ -95,6 +129,7 @@ export const {
   deleteRedux,
   setKeyringInitialized,
   setBalances,
+  updateSingleTokenBalance,
 } = accountSlice.actions;
 
 export default accountSlice.reducer;

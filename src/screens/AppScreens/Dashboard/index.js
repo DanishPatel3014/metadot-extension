@@ -21,13 +21,13 @@ import {
   blake2AsHex, decodeAddress,
 } from '@polkadot/util-crypto';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import type { MetadataDefBase } from '@polkadot/extension-inject/types';
-import { selectableNetworks } from '@polkadot/networks';
+import Acala from '@acala-network/api';
 import { ethers } from 'ethers';
 
 // Drop Down Icons
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import { options } from '@bifrost-finance/api';
 
 import {
   formatBalance, BN_HUNDRED, hexToU8a,
@@ -42,8 +42,10 @@ import AssetsAndTransactions from './AssetsAndTransactions';
 
 import { setApiInitializationStarts } from '../../../redux/slices/api';
 import {
+  updateSingleTokenBalance,
   setRpcUrl, setBalance, setChainName, setLoggedIn, resetAccountSlice,
   setBalances, setPublicKey,
+// eslint-disable-next-line import/namespace
 } from '../../../redux/slices/account';
 import { fonts, colors } from '../../../utils';
 import { decrypt } from '../../../utils/accounts';
@@ -120,7 +122,7 @@ function Dashboard(props) {
   const currentUser = useSelector((state) => state);
   const { apiInitializationStarts } = useSelector((state) => state.api);
   const {
-    publicKey, chainName, balance, tokenName, seed, balanceInUsd, accountName, walletName,
+    publicKey, chainName, balances, tokenName, seed, balanceInUsd, accountName, walletName,
     api,
   } = currentUser.account;
   async function main() {
@@ -128,7 +130,7 @@ function Dashboard(props) {
 
     // Retrieve the initial balance. Since the call has no callback, it is simply a promise
     // that resolves to the current on-chain value
-    let {
+    const {
       data: { free: previousFree },
       nonce: previousNonce,
     } = await api.query.system.account(publicKey);
@@ -140,28 +142,70 @@ function Dashboard(props) {
       ({ data: { free: currentFree }, nonce: currentNonce }) => {
         // Calculate the delta
         const change = currentFree.sub(previousFree);
-
         // Only display positive value changes (Since we are pulling `previous` above already,
         // the initial balance change will also be zero)
         if (!change.isZero()) {
-          console.log('Balance changed [][]');
+          // console.clear();
+          console.log('Balance changed', change);
           const bal = getBalance(api, publicKey)
             .then((res) => {
-              dispatch(setBalance(res));
+              console.log('Token name', tokenName, 'balance', res);
+              // dispatch(updateSingleTokenBalance({ name: tokenName, balance: res }));
+              // dispatch(setBalance(res));
             })
             .catch((err) => console.log('Err', err));
-          // const newBalance = chainName === 'AcalaMandala' ? change / 10 ** decimalPlaces[0] : change / 10 ** decimalPlaces;
-          // dispatch(setBalance(newBalance + balance));
 
-          previousFree = currentFree;
-          previousNonce = currentNonce;
+          // previousFree = currentFree;
+          // previousNonce = currentNonce;
           return bal;
         }
       },
     );
   }
 
-  main().catch(console.error);
+  useEffect(() => {
+    main().catch(console.error);
+  });
+
+  const mainForNonNative = async () => {
+    const { api } = currentUser.api;
+    const abc = [];
+    const totalTokens = await api.registry.chainTokens;
+    const decimals = await api.registry.chainDecimals;
+    console.log('Decimals in listener', decimals);
+    totalTokens.map(async (token, i) => {
+      await api.query.tokens.accounts(publicKey, { Token: token }, async (result) => {
+        const bal = formatNumber(result.free, decimals[i]);
+        console.log('Arr data', token, bal);
+        console.log('abc start', abc);
+        console.log('return from callback +++++++++++++++++++', {
+          name: token, balance: bal, decimals: decimals[i], isNative: false,
+        });
+        if (totalTokens.length !== abc.length) {
+          abc.push({
+            name: token, balance: bal, decimals: decimals[i], isNative: false,
+          });
+        }
+        console.log('Total tokens', totalTokens);
+        console.log('Total tokens i', i);
+        if (totalTokens.length - 1 === i) {
+          console.log('Total tokens dispatching');
+          dispatch(setBalances(abc));
+          setBalanceDetails(abc);
+          console.log('============================== the end', abc);
+        }
+      });
+      return true;
+    });
+    console.log('abc end', abc);
+    return true;
+  };
+
+  // mainForNonNative().catch(console.error);
+
+  useEffect(() => {
+    console.log('Dispatch working');
+  }, [dispatch]);
 
   const [apiTokenName, setApiTokenName] = useState('polkadot');
   const getTokenApi = `https://api.coingecko.com/api/v3/simple/price?ids=${apiTokenName}&vs_currencies=usd`;
@@ -198,6 +242,7 @@ function Dashboard(props) {
   };
 
   const getExistentialDeposit = async () => {
+    console.log('Acala', Acala);
     const data = await currentUser.api.api.consts.balances.existentialDeposit;
     console.log('Data', data);
 
@@ -231,8 +276,21 @@ function Dashboard(props) {
     // This is for Dusty
     // const existentialDeposit = 1 * 10 ** -3;
 
+    // const tx = await currentUser.api.api.tx.currencies
+    //   .transfer(
+    //     accountToSate.value,
+    //     {
+    //       Token: location.state.tokenName,
+    //     },
+    //     // eslint-disable-next-line no-undef
+    //     amountSending,
+    //   );
+
     const balance = existentialDeposit * 10 ** decimalPlaces;
 
+    // const nonNativeED = currentUser.api.api.tx.currencies;
+    const nonNativeED = currentUser.api.api.consts.balances.existentialDeposit;
+    console.log('Non native ED', nonNativeED == 0.1 * 10 ** decimalPlaces);
     console.log('Balance', balance);
     console.log('Existential deposit', currentUser.api.api.consts.balances.existentialDeposit);
     // eslint-disable-next-line eqeqeq
@@ -329,11 +387,12 @@ function Dashboard(props) {
   };
 
   const nonNativeTokenED = () => {
-    const MAX = new FixedPointNumber(0.01, 10);
+    console.log('ED [][]', currentUser.api.api.tx);
+    const MAX = new FixedPointNumber(0.01, 12);
     // const MAX = FixedPointNumber.fromInner('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff');
     console.log('MAX', MAX);
     // eslint-disable-next-line eqeqeq
-    console.log('BOOl [][]', new FixedPointNumber(0.1, 13) == currentUser.api.api.consts.balances.existentialDeposit);
+    console.log('BOOl [][]', new FixedPointNumber(0.1, 10) == currentUser.api.api.consts.balances.existentialDeposit);
   };
 
   const fetchBalance = async () => {
@@ -356,49 +415,6 @@ function Dashboard(props) {
         return bal;
       });
     });
-  };
-
-  const balances = [];
-  const setMultipleTokens = async () => {
-    try {
-      console.log('Chain =====>>>', currentUser.account.chainName);
-      const allTokens = currentUser.api.api.registry.chainTokens;
-      console.log('All tokens', allTokens);
-      // const allDecimals = currentUser.api.api.registry.chainDecimals;
-      // if (currentUser.account.chainName == 'Karura') {
-      //   allTokens = allTokens.splice(0, allTokens.length - 2);
-      //   console.log('All tokens after splice', allTokens);
-      // }
-      // allTokens.map(async (singleToken, i) => {
-      //   const tokenData2 = currentUser.api.api.query.tokens.accounts(publicKey, { Token: singleToken }, (result) => {
-      //     const bal = formatNumber(result.free, allDecimals[i]);
-      //     // const bal = 10;
-      //     console.log('Token and balance', singleToken, bal);
-      //     console.log('Balance details', balanceDetails);
-      //     const values = { tokenName: singleToken, balance: bal, decimals: allDecimals[i] };
-      //     // setBalanceDetails((prevState) => ([
-      //     //   ...prevState,
-      //     //   values,
-      //     // ]));
-      //     balances.push({
-      //       tokenName: singleToken, balance: bal, decimals: allDecimals[i], isNative: false,
-      //     });
-      //     console.log('Balances arr', balances);
-      //     setBalanceDetails((balanceDetails) => [...balanceDetails,
-      //       {
-      //         tokenName: singleToken, balance: bal, decimals: allDecimals[i], isNative: false,
-      //       }]);
-      //   });
-      // });
-    } catch (err) {
-      console.log('Err', err);
-    }
-  };
-
-  const getMultipleTokens = () => {
-    console.log('Redux before', currentUser);
-    dispatch(setBalances(balanceDetails));
-    console.log('Redux after', currentUser);
   };
 
   const getMultipleTokensBalance = async () => {
@@ -443,20 +459,20 @@ function Dashboard(props) {
     });
   };
 
-  const getTxFee = async () => {
-    console.log('Tx fee running', balance, publicKey);
-    const info = await currentUser.api.api.tx.balances
-      .transfer(publicKey, balance)
-      .paymentInfo(publicKey);
+  // const getTxFee = async () => {
+  //   console.log('Tx fee running', balance, publicKey);
+  //   const info = await currentUser.api.api.tx.balances
+  //     .transfer(publicKey, balance)
+  //     .paymentInfo(publicKey);
 
-    const adjFee = info.partialFee.muln(110).div(BN_HUNDRED);
-    const maxTransfer = balance - adjFee;
+  //   const adjFee = info.partialFee.muln(110).div(BN_HUNDRED);
+  //   const maxTransfer = balance - adjFee;
 
-    console.log('Adj fee', adjFee);
+  //   console.log('Adj fee', adjFee);
 
-    console.log('Tx fee', info.partialFee.toHuman());
-    console.log('Max Transfer', maxTransfer);
-  };
+  //   console.log('Tx fee', info.partialFee.toHuman());
+  //   console.log('Max Transfer', maxTransfer);
+  // };
 
   // --------State and funtions for SlectNetwork Modal
   // this function is currently not in use becuase other kusama main networks are disabled
@@ -689,10 +705,13 @@ function Dashboard(props) {
     // [api, amount, call, destWeight, isParaTeleport, recipientId, recipientParaId]
   };
 
+  // Transfer Kusama to Bifrost
   const XCMP2 = async () => {
     console.clear();
     try {
-      const x = currentUser.api.api.query.parachainInfo;
+      const provider = new WsProvider('wss://bifrost-rpc.liebi.com/ws');
+      const apiR = await ApiPromise.create(options({ provider }));
+      const x = await apiR.query.parachainInfo.parachainId();
       console.log('Parachin ID ===>>>', x);
       const amount = 0.001;
       const keyring = new Keyring({ type: 'sr25519' });
@@ -706,9 +725,12 @@ function Dashboard(props) {
       console.log('The amount', theAmount);
       // const theAmount = new BN(amount).multipliedBy(new BN(1000000000000)).toFixed();
       const paras = [
+
         {
           // X1: { Parachain: 2000 },
-          X1: { Parachain: 2001 },
+          // X1: { Parachain: 2001 },
+          name: 'dest',
+          X1: { Parachain: 2000 },
         },
         {
           X1: {
@@ -730,12 +752,15 @@ function Dashboard(props) {
             },
           },
         ],
-        3000000,
+        // 3000000,\
       ];
+
       console.log('Params set');
+
+      const info = await currentUser.api.api.tx.xcmPallet.reserveTransferAssets(...paras).paymentInfo(sender);
+      console.log('Info', info);
       const transferHandle = await currentUser.api.api.tx.xcmPallet.reserveTransferAssets(...paras);
       console.log('Transfer handle', transferHandle);
-      const info = await currentUser.api.api.tx.xcmPallet.reserveTransferAssets(...paras).paymentInfo(sender);
     } catch (err) {
       console.log('Error', err);
     }
@@ -758,41 +783,6 @@ function Dashboard(props) {
     const subAddress = evmToAddress(evmAddress, 5);
     console.log('Acala, Subscan and shibuyas address on hoonkime ===>>>', evmAddress);
     console.group('Sub address ====>>>', subAddress);
-  };
-
-  function ss58_decode(address) {
-    // const bytes = new Uint8Array([42, ...address]);
-    // const hash = blake2b(bytes);
-    // const complete = new Uint8Array([...bytes, hash[0], hash[1]]);
-    // console.log('Bye', bs58.encode(complete));
-    // return bs58.encode(complete);
-    console.log(`Parity ||| 0x${blake2AsHex(decodeAddress(address), 256).substring(26)}`);
-    //  return `0x${crypto.blake2AsHex(crypto.decodeAddress(address), 256).substring(26)}`;
-  }
-
-  const multipleAddresses = () => {
-    console.log('BS 58 [][]', bs58.decode(publicKey));
-    // eslint-disable-next-line eqeqeq
-    // if (publicKey.length != 32) {
-    //   return null;
-    // }
-    const bytes = new Uint8Array([42, ...publicKey]);
-    const hash = blake2b(bytes);
-    console.log('Hash', hash);
-    const complete = new Uint8Array([...bytes, hash[0], hash[1]]);
-    console.log('complete', bs58.encode(complete));
-    // console.log('Hello ===>>', ss58Format);
-    const RELAY_CHAIN = 'Relay Chain';
-    const hashes: MetadataDefBase[] = selectableNetworks
-      .filter(({ genesisHash }) => !!genesisHash.length)
-      .map((network) => ({
-        chain: network.displayName,
-        genesisHash: network.genesisHash[0],
-        icon: network.icon,
-        ss58Format: network.prefix,
-      }));
-    console.log('Hashes', hashes);
-    return hashes;
   };
 
   // --------XXXXXXXXXXXXXXX-----------
@@ -839,7 +829,7 @@ function Dashboard(props) {
       </DashboardHeader>
 
       <MainCard
-        balance={balance}
+        balances={balances}
         chainName={chainName}
         tokenName={tokenName}
         address={publicKey}
@@ -902,19 +892,22 @@ function Dashboard(props) {
       {/* <button onClick={sendTransaction}>Send</button> */}
       <button onClick={decryptSeed}>Decrypt</button>
       {/* <button onClick={getbalanceKarura}>Get karura balance</button> */}
-      {/* <button onClick={getExistentialDeposit}>Get existentialDeposit</button> */}
+      <button onClick={getExistentialDeposit}>Get existentialDeposit</button>
       {/* <button onClick={getTxFee}>Get Transaction fee</button> */}
       {/* <button onClick={getBloackDetails}>Get block details</button> */}
       {/* <button onClick={doTransaction}>Do transaction</button> */}
       {/* <button onClick={getMultipleTokensBalance}>Multiple tokens balance</button> */}
-      {/* <button onClick={nonNativeTokenED}>Non native tokens ED</button> */}
+      <button onClick={nonNativeTokenED}>Non native tokens ED</button>
       {/* <button onClick={setMultipleTokens}>Set multiple tokens</button> */}
       {/* <button onClick={getMultipleTokens}>Get multiple tokens</button> */}
       {/* <button onClick={fetchBalance}>Fetch</button> */}
       {/* <button onClick={multipleAddresses}>Multiple Addresses</button> */}
       {/* <button onClick={() => ss58_decode(publicKey)}>SS 58</button> */}
+      {/* <button onClick={() => updateTheBalance({ name: 'KSM', balance: 100 })}>Update single balance</button> */}
+
+      {/* <button onClick={() => dispatch(updateSingleTokenBalance({ name: 'KSM', balance: 100 }))}>Redux [][] Update single balance</button> */}
       <button onClick={() => console.log(' Redux =====>>>', currentUser)}>Get balance details</button>
-      <button onClick={async () => {
+      {/* <button onClick={async () => {
         // const bal = await getBalance(currentUser.api.api, currentUser.account.publicKey);
         // console.log('BAL ||||', bal);
 
@@ -924,11 +917,11 @@ function Dashboard(props) {
       }}
       >
         Get
-      </button>
+      </button> */}
       {/* <button onClick={() => convertIntoH160Address(publicKey)}>Eth</button> */}
       {/* <button onClick={getEthAddressFromEthersLib}> getEthAddressFromEthersLib </button> */}
-      <button onClick={deposit}>Deposit</button>
-      <button onClick={XCMP2}>XCMP</button>
+      {/* <button onClick={deposit}>Deposit</button>
+      <button onClick={XCMP2}>XCMP</button> */}
     </Wrapper>
   );
 }

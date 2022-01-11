@@ -13,24 +13,42 @@ import {
   SubText2,
   VerticalContentDiv,
 } from './StyledComponents';
-import { fonts } from '../../../utils';
+import { fonts, helpers } from '../../../utils';
 import { setAuthScreenModal, setConfirmSendModal } from '../../../redux/slices/successModalHandling';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
+const { trimBalance } = helpers;
 
 function ConfirmSend({
   open, handleClose, handleConfirm, style, accountTo, amount, accountFrom,
-  transactionFee, tokenName, loading2,
+  transactionFee, tokenName, loading2, isNative,
 }) {
   const transactionAmount = (valueOne, valueTwo) => {
-    const value = parseFloat(valueOne) + parseFloat(valueTwo);
-    const val = value.toString();
-    const trimmedValue = val.slice(0, (val.indexOf('.')) + 6);
-    return trimmedValue;
+    if (isNative) {
+      const value = parseFloat(valueOne) + parseFloat(valueTwo);
+      const val = value.toString();
+      const trimmedValue = val.slice(0, (val.indexOf('.')) + 6);
+      return `${trimmedValue} ${nativeTokenName}`;
+    }
+    // return 10;
+    return `${trimBalance(amount)} ${tokenName} + ${trimBalance(transactionFee)} ${nativeTokenName}`;
   };
 
   const dispatch = useDispatch();
   const { isAuthorizedForSigning } = useSelector((state) => state.successModalHandling);
+  const { balances } = useSelector((state) => state.account);
+
+  let nativeTokenName;
+
+  const getNativeTokenName = () => {
+    balances.map((singleToken) => {
+      if (singleToken.isNative) {
+        nativeTokenName = singleToken.name;
+      }
+      return null;
+    });
+    return nativeTokenName;
+  };
 
   const btnS = {
     text: 'Confirm',
@@ -91,8 +109,8 @@ function ConfirmSend({
               </VerticalContentDiv>
 
               <VerticalContentDiv marginTop="10px">
-                <MainText2 id="amount" textAlign="end" className={mainHeadingfontFamilyClass}>{`${amount} ${tokenName}`}</MainText2>
-                <MainText2 id="transaction-fee" marginTop="10px" marginBottom="10px" textAlign="end" className={mainHeadingfontFamilyClass}>{`${transactionFee} ${tokenName}`}</MainText2>
+                <MainText2 id="amount" textAlign="end" className={mainHeadingfontFamilyClass}>{`${trimBalance(amount)} ${tokenName}`}</MainText2>
+                <MainText2 id="transaction-fee" marginTop="10px" marginBottom="10px" textAlign="end" className={mainHeadingfontFamilyClass}>{`${trimBalance(transactionFee)} ${getNativeTokenName()}`}</MainText2>
               </VerticalContentDiv>
             </HorizontalContentDiv>
 
@@ -104,7 +122,7 @@ function ConfirmSend({
               </VerticalContentDiv>
 
               <VerticalContentDiv marginTop="10px">
-                <MainText2 id="transaction-amount" textAlign="end" className={mainHeadingfontFamilyClass}>{`${transactionAmount(amount, transactionFee)} ${tokenName}`}</MainText2>
+                <MainText2 id="transaction-amount" textAlign="end" className={mainHeadingfontFamilyClass}>{`${transactionAmount(amount, transactionFee)}`}</MainText2>
                 <MainText2 textAlign="end" hide className={mainHeadingfontFamilyClass}>
                   {tokenName[0] === 'WND' ? '' : '$ 594.304' }
                 </MainText2>

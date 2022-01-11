@@ -17,6 +17,7 @@ const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 
 function AssetCard({
   name, amount, shortName, amountInUsd, logo,
+  isNative,
 }) {
   const { apiInitializationStarts } = useSelector((state) => state.api);
   const history = useHistory();
@@ -27,11 +28,11 @@ function AssetCard({
     fontWeight: 500,
     height: '30px',
     br: '4px',
-    handleClick: () => history.push('/Send'),
+    handleClick: () => history.push({ pathname: '/Send', state: { tokenName: shortName, amount, isNative } }),
     disabled: !!apiInitializationStarts,
   };
 
-  console.log('here asset card', name, amount);
+  console.log('here asset card', shortName, amount);
   return (
     <AssetCardWrapper id="asset-card">
       <HorizontalContentDiv>

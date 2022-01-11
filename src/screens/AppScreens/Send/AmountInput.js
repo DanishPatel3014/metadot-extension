@@ -18,10 +18,11 @@ const AmountInput = ({
   maxInputHandler,
   amountIsValidHandler,
   insufficientBal,
-  currentUser,
+  // currentUser,
   trimBalance,
   errorMessages,
   error,
+  location,
 }) => {
   const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 
@@ -32,7 +33,7 @@ const AmountInput = ({
     br: '6px',
     fontSize: '12px',
     handleClick: maxInputHandler,
-    disabled: currentUser.account.balance === 0,
+    disabled: location.amount === 0,
     // isLoading: loading1,
   };
 
@@ -84,19 +85,20 @@ const AmountInput = ({
             className={subHeadingfontFamilyClass}
             style={{ marginBottom: '1rem' }}
           >
-            {helpers.validateAmount(currentUser.account.balance, amountState.value)}
+            {helpers.validateAmount(location.state.amount, amountState.value)}
           </WarningText>
           )
             }
       <CalculatedAmount>
         <EquivalentInUSDT id="equivalent-in-usd" className={subHeadingfontFamilyClass}>
           $
-          {currentUser.account.balanceInUsd}
+          {/* {currentUser.account.balanceInUsd} */}
+          {10}
         </EquivalentInUSDT>
         <Balance {...balanceProps}>
           Balance:
           {' '}
-          {`${trimBalance(currentUser.account.balance)} ${currentUser.account.tokenName}`}
+          {`${trimBalance(location.state.amount)} ${location.state.tokenName}`}
         </Balance>
       </CalculatedAmount>
       <div style={{ height: '1.5rem' }}>

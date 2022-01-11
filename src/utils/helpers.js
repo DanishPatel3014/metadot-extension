@@ -62,8 +62,10 @@ function validateAddress(userPublicAddress, senderPublicAddress) {
 }
 
 function validateAmount(userCurrentAmount, sendAmount) {
+  console.log(userCurrentAmount, sendAmount);
   try {
     if (userCurrentAmount < sendAmount) {
+      console.log('Throw error');
       throw String('Amount is exceeding from your current balance');
     }
     return true;
@@ -88,10 +90,11 @@ function isUserNameValid(username) {
 }
 
 // eslint-disable-next-line no-unused-vars
-const trimBalance = (value) => 1;
-// const val = value.toString();
-// const trimmedValue = val.slice(0, (val.indexOf('.')) + 4);
-// return trimmedValue;
+const trimBalance = (value) => {
+  const val = value.toString();
+  const trimmedValue = val.slice(0, (val.indexOf('.')) + 4);
+  return trimmedValue;
+};
 
 async function getKSM() {
   let amm;

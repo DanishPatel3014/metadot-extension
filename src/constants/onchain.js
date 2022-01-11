@@ -63,7 +63,7 @@ const BIFROST_CONFIG = {
   CHAIN_NAME: 'Bifrost',
   TOKEN_NAME: '',
   LOGO: BifrostIcon,
-  RPC_URL: '',
+  RPC_URL: 'wss://bifrost-rpc.liebi.com/ws',
 };
 
 const PHALA_CONFIG = {

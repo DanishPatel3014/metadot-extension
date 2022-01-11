@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import { options as AcalaOptions } from '@acala-network/api';
 import { formatBalance } from '@polkadot/util';
-import { encodeAddress } from '@polkadot/keyring';
+import { encodeAddress, decodeAddress } from '@polkadot/keyring';
 import constants from '../constants/onchain';
 
 const { WsProvider, ApiPromise, Keyring } = require('@polkadot/api');
@@ -79,6 +79,7 @@ const getBalanceWithMultipleTokens = async (api, account) => {
     ]);
 
     const userBalance = formatBalance(balances.free, { decimals: api.registry.chainDecimals[0], forceUnit: '-', withUnit: false });
+    console.log('User balance hi', userBalance);
     return parseFloat(userBalance);
   } catch (err) {
     throw err;
@@ -121,7 +122,7 @@ const getBalances = () => {
 // eslint-disable-next-line consistent-return
 const setMultipleTokens = async (api, account, chainName) => {
   // balances = [];
-  console.clear();
+  // console.clear();
   try {
     console.log('Chain =====>>>', chainName);
     let allTokens = api.registry.chainTokens;
@@ -165,8 +166,14 @@ const setMultipleTokens = async (api, account, chainName) => {
   }
 };
 
+// const getTransactionFee = () => {
+//   return 0.1;
+// };
+
 const getTransactionFee = async (api, sender, recipient, decimalPlaces, amount) => {
+  console.log('In service ===>>', sender, recipient, decimalPlaces, amount);
   const amountSending = amount * 10 ** decimalPlaces;
+  // const amountSending = 1;
   const info = await api.tx.balances
     // eslint-disable-next-line no-undef
     .transfer(sender, BigInt(amountSending))
@@ -185,10 +192,11 @@ const addressMapper = (address, prefix) => {
 export {
   providerInitialization,
   getBalance,
-  // getBalanceWithMultipleTokens,
+  getBalanceWithMultipleTokens,
   getSender,
   getTransactionFee,
   toUnit,
   addressMapper,
   getBalances,
+  getBalanceWithSingleToken,
 };
