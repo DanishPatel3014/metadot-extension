@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import './App.css';
 
-import keyring from '@polkadot/ui-keyring';
 import { ResponseModal, TransactionProgress } from './components';
 import { setIsResponseModalOpen } from './redux/slices/modalHandling';
 import { setIsTransactionProgressModalOpen } from './redux/slices/transctionProgressModalHandling';
@@ -34,6 +33,7 @@ const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
   const [accounts, setAccounts] = useState([]);
+  const [api, setApi] = useState([]);
   const [authRequests, setAuthRequests] = useState([]);
   // const [metaRequests, setMetaRequests] = useState([]);
   // const [signRequests, setSignRequests] = useState([]);
@@ -61,12 +61,6 @@ function App() {
 
     console.log('accounts ==>>', accounts);
     if (accounts.length > 0) {
-      try {
-        keyring.loadAll({ type: 'sr25519' }, accounts);
-      } catch (error) {
-        keyring.loadInjected(accounts[accounts.length - 1].address,
-          accounts[accounts.length - 1].meta, accounts[accounts.length - 1].type);
-      }
       saveAccountInRedux(accounts[accounts.length - 1]);
     }
 
@@ -87,6 +81,7 @@ function App() {
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
+  console.log('app.js rereanderd');
   const {
     isResponseModalOpen, mainText, subText, responseImage,
   } = useSelector(

@@ -41,9 +41,13 @@ function ApiManager({ rpc }) {
 
       dispatch(setBalanceInUsd(dollarAmount));
 
-      await apiR.isReady;
+      console.log('api before isReady ==>>', apiR);
+      // await apiR.isReady;
       setApiState(apiR);
       dispatch(setApi(apiR));
+
+      localStorage.setItem('rpcUrl', rpcUrl);
+      window.chrome.runtime.connect({ name: 'extension' });
 
       dispatch(setApiInitializationStarts(false));
       if (loadingFor === 'Api Initialization...') {

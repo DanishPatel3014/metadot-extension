@@ -14,7 +14,7 @@ import {
 } from './styledComponent';
 import { WarningText } from '../..';
 import { setAuthScreenModal, setConfirmSendModal } from '../../../redux/slices/modalHandling';
-import { exportAccount } from '../../../messaging';
+import { getAuthorizePair, exportAccount } from '../../../messaging';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { decrypt } = accounts;
@@ -40,18 +40,29 @@ function AuthModal({
       // const unlockedSender = sender.unlock(password);
       // console.log('sender unlocked =>>', unlockedSender);
 
-      const accountJson = await exportAccount(currentUser.publicKey, password);
-      console.log('sender json', accountJson.exportedJson);
-      const sender = keyring.createFromJson(accountJson.exportedJson);
-      console.log('sender locked', sender);
-      sender.unlock(password);
-      console.log('sender unlocked', sender);
+      const sender = await getAuthorizePair(currentUser.publicKey, password);
+      console.log('sender pair ==>>', sender);
+
+      // const accountJson = await exportAccount(currentUser.publicKey, password);
+      // console.log('sender json ==>>', accountJson);
+
+      // keyring.loadAll({ type: 'sr25519' });
+      // const sender = keyring.createFromJson(accountJson.exportedJson);
+      // console.log('sender pair from json', sender);
+
+      // sender.unlock(password);
+
+      // const senderFromPair = keyring.addPair(sender.pair, password);
+      // console.log('sender pair from pair', senderFromPair);
+
+      // sender.unlock(password);
+      // console.log('sender unlocked', sender);s
 
       // const dSeed = decrypt(currentUser.seed, password);
       console.log('Correct');
       dispatch(setAuthScreenModal(false));
       dispatch(setConfirmSendModal(true));
-      sendTransaction(sender);
+      sendTransaction({ address: currentUser.publicKey, password });
     } catch (err) {
       console.log('error due to wrong handle sumbit ', err);
       // alert('Password does not match');

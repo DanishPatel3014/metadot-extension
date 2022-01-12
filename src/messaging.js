@@ -26,6 +26,7 @@ port.onMessage.addListener((data) => {
 });
 
 function sendMessage(message, request, subscriber) {
+  console.log('execute transaction messaging', message, request, subscriber);
   return new Promise((resolve, reject) => {
     const id = Date.now();
     handlers[id] = { reject, resolve, subscriber };
@@ -62,4 +63,14 @@ export async function createAccountSuri(name, password, suri,
 
 export async function exportAccount(address, password) {
   return sendMessage('pri(accounts.export)', { address, password });
+}
+
+export async function getAuthorizePair(address, password) {
+  return sendMessage('pri(accounts.getAuthorizePair)', { address, password });
+}
+
+export async function executeTransaction(address, password, tp1, tp2) {
+  return sendMessage('pri(accounts.executeTransaction)', {
+    address, password, tp1, tp2,
+  });
 }

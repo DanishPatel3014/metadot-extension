@@ -146,9 +146,12 @@ function CreateWallet() {
   };
 
   const handleContinue = async () => {
-    const tmpPasswordW = '123';
-    const decryptedSeedW = decrypt(seed, tmpPasswordW);
     try {
+      const tmpPasswordW = '123';
+      const decryptedSeedW = decrypt(seed, tmpPasswordW);
+
+      console.log('ahsan ==>>', decryptedSeedW);
+
       if (!isUserNameValid(walletName) || walletName.length < 3) {
         setIsValidWalletName(true);
         validatePasswordAndConfirmPassword();
@@ -160,6 +163,7 @@ function CreateWallet() {
         return;
       }
       // const res = await createAccount(walletName, password, decryptedSeedW);
+      console.log('ahsan create account suri ==>>');
       await createAccountSuri(walletName, password, decryptedSeedW);
 
       // passsword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/);

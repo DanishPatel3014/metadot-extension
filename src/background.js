@@ -10,21 +10,37 @@ import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
+import { ApiPromise, WsProvider } from '@polkadot/api';
+
 // import { CryptoAndKeyringInit } from './utils/accounts';
 
 // setup the notification (same a FF default background, white text)
 // eslint-disable-next-line no-void
 void chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
-
+console.log('background script running');
 // listen to all messages and handle appropriately
-chrome.runtime.onConnect.addListener((port) => {
-  // shouldn't happen, however... only listen to what we know about
-  console.log('PORT_CONTENT PORT_EXTENSION ==>>', PORT_CONTENT, PORT_EXTENSION);
-  assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
+chrome.runtime.onConnect.addListener(async (port) => {
+  try { // shouldn't happen, however... only listen to what we know about
+    console.log('PORT_CONTENT PORT_EXTENSION ==>>', port);
+    assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
+    let handlerAPI;
+    // message and disconnect handlers
 
-  // message and disconnect handlers
-  port.onMessage.addListener((data) => handlers(data, port));
-  port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+    if (port.name === PORT_EXTENSION) {
+      const wsProvider = new WsProvider(localStorage.getItem('rpcUrl'));
+      handlerAPI = await ApiPromise.create({ provider: wsProvider });
+      console.log(handlerAPI);
+    }
+
+    port.onMessage.addListener((data) => handlers(data, port, handlerAPI));
+    port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
+  } catch (error) {
+    console.log('error in onConnect background ==>>', error);
+  }
+});
+
+chrome.runtime.onRestartRequired.addListener((data) => {
+  console.log('PORT_CONTENT PORT_EXTENSION ==>>', data);
 });
 
 // initial setup
