@@ -275,19 +275,42 @@ const Send = () => {
       const decimals = decimalPlaces.length > 1
         ? decimalPlaces[0] : decimalPlaces;
 
+      const tx = await api.tx.balances
+        .transfer(
+          accountToSate.value, amountState.value * 10 ** decimals,
+        );
+
+      console.log('created transaction ==>>', tx);
+
+      const transactionData = {
+        method: tx.toHex(),
+        specVersion: api.runtimeVersion.specVersion,
+        genesisHash: api.genesisHash,
+        tip: tx.tip,
+      };
+
+      console.log('created transaction data ==>>', transactionData);
+
+      const txPayload = api.createType('ExtrinsicPayload', transactionData, { version: tx.version });
+
+      console.log('created transaction payload ==>>', txPayload);
+
+      const txHex = txPayload.toU8a(true);
+
+      console.log('execute transaction params ==>>', address, password, txHex);
+
       const response = await executeTransaction(address,
-        password, accountToSate.value,
-        amountState.value * 10 ** decimals);
+        password, txHex);
 
       console.log('execute transaction returns ==>>', response);
 
-      const { transaction, hash } = response;
+      const { signatureHex } = response;
 
-      const signedTransactions = await api.tx(transaction);
+      tx.addSignature(address, signatureHex, txPayload);
 
-      console.log('execute transaction returns signedTransaction ==>>', signedTransactions);
+      console.log('execute transaction returns signedTransaction ==>>', tx);
 
-      await signedTransactions.send(({ status, events }) => {
+      await tx.send(({ status, events }) => {
       // if (status.isInBlock) txStatus = status.isInBlock;
         const txResSuccess = events
           .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
@@ -296,7 +319,7 @@ const Send = () => {
         console.log('Tx res Success', txResSuccess.length);
         console.log('Tx res Fail', txResFail.length);
         if (status.isInBlock) {
-          data.hash = hash;
+          data.hash = tx.hash.toHex();
           if (txResFail.length >= 1) {
             console.log('Tx failed', txResFail.length);
             data.status = 'Failed';
@@ -339,7 +362,7 @@ const Send = () => {
           console.log('Res', res);
         })
         .catch((err) => {
-          data.hash = hash;
+          data.hash = tx.hash.toHex();
           alert('Tx failed');
           console.log('Error', err);
           data.status = 'Failed';

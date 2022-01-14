@@ -46,9 +46,6 @@ function ApiManager({ rpc }) {
       setApiState(apiR);
       dispatch(setApi(apiR));
 
-      localStorage.setItem('rpcUrl', rpcUrl);
-      window.chrome.runtime.connect({ name: 'extension' });
-
       dispatch(setApiInitializationStarts(false));
       if (loadingFor === 'Api Initialization...') {
         dispatch(setIsResponseModalOpen(true));
