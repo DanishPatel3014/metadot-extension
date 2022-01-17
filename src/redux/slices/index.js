@@ -5,6 +5,7 @@ import api from './api';
 import modalHandling from './modalHandling';
 import transactionProgressModalHandling from './transctionProgressModalHandling';
 import transactions from './transactions';
+import communicate from './communicate';
 
 // eslint-disable-next-line import/prefer-default-export
 export const rootReducer = combineReducers({
@@ -14,4 +15,5 @@ export const rootReducer = combineReducers({
   modalHandling,
   transactionProgressModalHandling,
   transactions,
+  communicate,
 });

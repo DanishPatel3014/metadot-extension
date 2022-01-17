@@ -4,33 +4,42 @@
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
-const port = chrome.runtime.connect({ name: PORT_EXTENSION });
+import { setPort } from './redux/slices/communicate';
+import store from './redux/store';
+
+const tPort = chrome.runtime.connect({ name: PORT_EXTENSION });
+store.dispatch(setPort(tPort));
+addListener();
+
 const handlers = {};
 
-port.onMessage.addListener((data) => {
-  const handler = handlers[data.id];
-  if (!handler) {
-    console.error(`Unknown response: ${JSON.stringify(data)}`);
-    return;
-  }
-  if (!handler.subscriber) {
-    delete handlers[data.id];
-  }
-  if (data.subscription) {
-    (handler.subscriber)(data.subscription);
-  } else if (data.error) {
-    handler.reject(new Error(data.error));
-  } else {
-    handler.resolve(data.response);
-  }
-});
-
 function sendMessage(message, request, subscriber) {
-  console.log('execute transaction messaging', message, request, subscriber);
+  const { communicate } = store.getState();
   return new Promise((resolve, reject) => {
     const id = Date.now();
     handlers[id] = { reject, resolve, subscriber };
-    port.postMessage({ id, message, request: request || {} });
+    communicate.port.postMessage({ id, message, request: request || {} });
+  });
+}
+
+export function addListener() {
+  const { communicate } = store.getState();
+  communicate.port.onMessage.addListener((data) => {
+    const handler = handlers[data.id];
+    if (!handler) {
+      console.error(`Unknown response: ${JSON.stringify(data)}`);
+      return;
+    }
+    if (!handler.subscriber) {
+      delete handlers[data.id];
+    }
+    if (data.subscription) {
+      (handler.subscriber)(data.subscription);
+    } else if (data.error) {
+      handler.reject(new Error(data.error));
+    } else {
+      handler.resolve(data.response);
+    }
   });
 }
 
