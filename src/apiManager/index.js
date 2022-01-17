@@ -47,6 +47,10 @@ function ApiManager({ rpc }) {
       console.log('api before isReady ==>>', apiR);
       // await apiR.isReady;
       setApiState(apiR);
+      localStorage.setItem('rpcUrl', rpcUrl);
+      const port = chrome.runtime.connect({ name: 'extension' });
+      dispatch(setPort(port));
+      addListener();
       dispatch(setApi(apiR));
 
       dispatch(setApiInitializationStarts(false));
@@ -61,9 +65,6 @@ function ApiManager({ rpc }) {
       }
     };
 
-    const port = chrome.runtime.connect({ name: 'extension' });
-    dispatch(setPort(port));
-    addListener();
     setAPI(rpc);
   }, [chainName, publicKey, loadingFor, dispatch, rpc]);
   return (

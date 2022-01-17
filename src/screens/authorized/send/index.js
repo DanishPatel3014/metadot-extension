@@ -3,7 +3,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import transactionHandler from '@polkadot/extension-base/background/handlers';
 import { addTransaction } from '../../../redux/slices/transactions';
 import { helpers } from '../../../utils';
 import services from '../../../utils/services';

@@ -10,25 +10,32 @@ import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
 import { cryptoWaitReady } from '@polkadot/util-crypto';
-
-// import { CryptoAndKeyringInit } from './utils/accounts';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 
 // setup the notification (same a FF default background, white text)
 // eslint-disable-next-line no-void
 void chrome.browserAction.setBadgeBackgroundColor({ color: '#d90000' });
-console.log('background script running');
-// listen to all messages and handle appropriately
+
 chrome.runtime.onConnect.addListener(async (port) => {
-  try { // shouldn't happen, however... only listen to what we know about
-    console.log('PORT_CONTENT PORT_EXTENSION ==>>', port);
+  try {
     assert([PORT_CONTENT, PORT_EXTENSION].includes(port.name), `Unknown connection from ${port.name}`);
 
-    // message and disconnect handlers
-    port.onMessage.addListener((data) => handlers(data, port));
+    if (port.name === PORT_EXTENSION && localStorage.getItem('rpcUrl')) {
+      const wsProvider = new WsProvider(localStorage.getItem('rpcUrl'));
+      const handlerAPI = await ApiPromise.create({ provider: wsProvider });
+      port.onMessage.addListener((data) => handlers(data, port, handlerAPI));
+    } else {
+      port.onMessage.addListener((data) => handlers(data, port));
+    }
+
     port.onDisconnect.addListener(() => console.log(`Disconnected from ${port.name}`));
   } catch (error) {
     console.log('error in onConnect background ==>>', error);
   }
+});
+
+chrome.runtime.onRestartRequired.addListener((data) => {
+  console.log('PORT_CONTENT PORT_EXTENSION ==>>', data);
 });
 
 // initial setup
@@ -44,7 +51,3 @@ cryptoWaitReady()
   .catch((error) => {
     console.error('initialization failed', error);
   });
-
-// chrome.runtime.onInstalled.addListener(() => {
-//   CryptoAndKeyringInit();
-// });
