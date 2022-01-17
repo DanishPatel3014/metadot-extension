@@ -3,6 +3,7 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
+import transactionHandler from '@polkadot/extension-base/background/handlers';
 import { addTransaction } from '../../../redux/slices/transactions';
 import { helpers } from '../../../utils';
 import services from '../../../utils/services';
@@ -274,42 +275,19 @@ const Send = () => {
       const decimals = decimalPlaces.length > 1
         ? decimalPlaces[0] : decimalPlaces;
 
-      const tx = await api.tx.balances
-        .transfer(
-          accountToSate.value, amountState.value * 10 ** decimals,
-        );
-
-      console.log('created transaction ==>>', tx);
-
-      const transactionData = {
-        method: tx.toHex(),
-        specVersion: api.runtimeVersion.specVersion,
-        genesisHash: api.genesisHash,
-        tip: tx.tip,
-      };
-
-      console.log('created transaction data ==>>', transactionData);
-
-      const txPayload = api.createType('ExtrinsicPayload', transactionData, { version: tx.version });
-
-      console.log('created transaction payload ==>>', txPayload);
-
-      const txHex = txPayload.toU8a(true);
-
-      console.log('execute transaction params ==>>', address, password, txHex);
-
       const response = await executeTransaction(address,
-        password, txHex);
+        password, accountToSate.value,
+        amountState.value * 10 ** decimals);
 
       console.log('execute transaction returns ==>>', response);
 
-      const { signatureHex } = response;
+      const { transaction, hash } = response;
 
-      tx.addSignature(address, signatureHex, txPayload);
+      const signedTransactions = await api.tx(transaction);
 
-      console.log('execute transaction returns signedTransaction ==>>', tx);
+      console.log('execute transaction returns signedTransaction ==>>', signedTransactions);
 
-      await tx.send(({ status, events }) => {
+      await signedTransactions.send(({ status, events }) => {
       // if (status.isInBlock) txStatus = status.isInBlock;
         const txResSuccess = events
           .filter(({ event }) => api.events.system.ExtrinsicSuccess.is(event));
@@ -318,7 +296,7 @@ const Send = () => {
         console.log('Tx res Success', txResSuccess.length);
         console.log('Tx res Fail', txResFail.length);
         if (status.isInBlock) {
-          data.hash = tx.hash.toHex();
+          data.hash = hash;
           if (txResFail.length >= 1) {
             console.log('Tx failed', txResFail.length);
             data.status = 'Failed';
@@ -361,7 +339,7 @@ const Send = () => {
           console.log('Res', res);
         })
         .catch((err) => {
-          data.hash = tx.hash.toHex();
+          data.hash = hash;
           alert('Tx failed');
           console.log('Error', err);
           data.status = 'Failed';

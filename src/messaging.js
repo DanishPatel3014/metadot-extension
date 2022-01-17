@@ -78,8 +78,8 @@ export async function getAuthorizePair(address, password) {
   return sendMessage('pri(accounts.getAuthorizePair)', { address, password });
 }
 
-export async function executeTransaction(address, password, txHex) {
+export async function executeTransaction(address, password, tp1, tp2) {
   return sendMessage('pri(accounts.executeTransaction)', {
-    address, password, txHex,
+    address, password, tp1, tp2,
   });
 }
