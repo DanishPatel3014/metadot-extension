@@ -20,7 +20,9 @@ const { getBalance, providerInitialization, getBalanceWithMultipleTokens } = ser
 function ApiManager({ rpc }) {
   // eslint-disable-next-line import/no-mutable-exports
   const currentUser = useSelector((state) => state);
-  const { api, activeAccount, modalHandling } = currentUser;
+  const {
+    api, activeAccount, modalHandling, communicate,
+  } = currentUser;
   const { publicKey, chainName } = activeAccount;
   const { loadingFor } = modalHandling;
   const [apiState, setApiState] = useState(api.api);
@@ -48,6 +50,7 @@ function ApiManager({ rpc }) {
       // await apiR.isReady;
       setApiState(apiR);
       localStorage.setItem('rpcUrl', rpcUrl);
+      // if (communicate.port.disconnect)communicate.port.disconnect();
       const port = chrome.runtime.connect({ name: 'extension' });
       dispatch(setPort(port));
       addListener();
@@ -66,7 +69,7 @@ function ApiManager({ rpc }) {
     };
 
     setAPI(rpc);
-  }, [chainName, publicKey, loadingFor, dispatch, rpc]);
+  }, [chainName, publicKey, loadingFor, dispatch, rpc, communicate.port]);
   return (
     <div style={{ display: 'none' }}>
       <p>this</p>
