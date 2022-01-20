@@ -69,7 +69,9 @@ function ApiManager({ rpc }) {
     };
 
     setAPI(rpc);
-  }, [chainName, publicKey, loadingFor, dispatch, rpc, communicate.port]);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chainName, publicKey, loadingFor, rpc]);
   return (
     <div style={{ display: 'none' }}>
       <p>this</p>

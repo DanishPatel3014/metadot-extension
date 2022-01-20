@@ -39,13 +39,6 @@ function App() {
   // const [signRequests, setSignRequests] = useState([]);
 
   useEffect(() => {
-    subscribeAccounts(setAccounts);
-    // subscribeAuthorizeRequests(setAuthRequests);
-    // subscribeMetadataRequests(setMetaRequests),
-    // subscribeSigningRequests(setSignRequests),
-  }, []);
-
-  useEffect(() => {
     const saveAccountInRedux = ({ name, address }) => {
       // update redux data and tracking flags accordingly
       dispatch(setLoggedIn(true));
@@ -81,6 +74,18 @@ function App() {
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
+  const { communicate } = currentUser;
+
+  useEffect(() => {
+    console.log('chal raha hun bhai men');
+    if (communicate.port) {
+      console.log('chal raha hun bhai men');
+      subscribeAccounts(setAccounts);
+    }
+    // subscribeAuthorizeRequests(setAuthRequests);
+    // subscribeMetadataRequests(setMetaRequests),
+    // subscribeSigningRequests(setSignRequests),
+  }, [communicate.port]);
   console.log('app.js rereanderd');
   const {
     isResponseModalOpen, mainText, subText, responseImage,

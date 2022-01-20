@@ -22,7 +22,7 @@ function sendMessage(message, request, subscriber) {
   });
 }
 
-export function addListener() {
+export async function addListener() {
   const { communicate } = store.getState();
   communicate.port.onMessage.addListener((data) => {
     const handler = handlers[data.id];

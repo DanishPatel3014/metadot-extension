@@ -12,6 +12,10 @@ export const communicateSlice = createSlice({
   reducers: {
 
     setPort: (state, action) => {
+      console.log('setting port bhai ==>>', state, action);
+      // if (state.port && state.port.disconnect) {
+      //   state.port.disconnect();
+      // }
       state.port = action.payload;
     },
 
