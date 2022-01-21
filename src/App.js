@@ -22,64 +22,32 @@ import { addAccount } from './redux/slices/accounts';
 
 import {
   subscribeAccounts,
+  subscribeAuthorizeRequests,
   approveAuthRequest,
+  subscribeMetadataRequests,
+  subscribeSigningRequests,
 } from './messaging';
-
-// import {
-//   subscribeMetadataRequests, subscribeSigningRequests,
-// } from './messaging';
 
 const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
   const [accountss, setAccountss] = useState([]);
   const [authRequests, setAuthRequests] = useState([]);
-  // const [metaRequests, setMetaRequests] = useState([]);
-  // const [signRequests, setSignRequests] = useState([]);
-
-  useEffect(() => {
-    const saveAccountInRedux = ({ name, address }) => {
-      // update redux data and tracking flags accordingly
-      dispatch(setLoggedIn(true));
-      dispatch(setPublicKey(address));
-      dispatch(setAccountName(name));
-      // dispatch(setWalletPassword(hashedPassword));
-
-      dispatch(addAccount({
-        accountName: name,
-        publicKey: address,
-      }));
-    };
-
-    console.log('accountss ==>>', accountss, accounts);
-    if (accountss.length > Object.keys(accounts).length) {
-      saveAccountInRedux(accountss[accountss.length - 1]);
-    }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accountss]);
-
-  useEffect(() => {
-    console.log('authRequests ==>>', authRequests);
-  }, [authRequests]);
-
-  // useEffect(() => {
-  //   console.log('metaRequests ==>>', metaRequests);
-  // }, []);
-
-  // useEffect(() => {
-  //   console.log('signRequests ==>>', signRequests);
-  // }, []);
+  const [metaRequests, setMetaRequests] = useState([]);
+  const [signRequests, setSignRequests] = useState([]);
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
   const { api, accounts } = currentUser;
 
   useEffect(() => {
-    subscribeAccounts(setAccountss);
-    // subscribeAuthorizeRequests(setAuthRequests);
-    // subscribeMetadataRequests(setMetaRequests),
-    // subscribeSigningRequests(setSignRequests),
+    Promise.all([
+      subscribeAccounts(setAccountss),
+      subscribeAuthorizeRequests(setAuthRequests),
+      subscribeMetadataRequests(setMetaRequests),
+      subscribeSigningRequests(setSignRequests),
+    ]).catch(console.error);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [api.api]);
 
   const {
@@ -97,6 +65,40 @@ function App() {
   );
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    const saveAccountInRedux = ({ name, address }) => {
+      // update redux data and tracking flags accordingly
+      dispatch(setLoggedIn(true));
+      dispatch(setPublicKey(address));
+      dispatch(setAccountName(name));
+      // dispatch(setWalletPassword(hashedPassword));
+
+      dispatch(addAccount({
+        accountName: name,
+        publicKey: address,
+      }));
+    };
+
+    console.log('accounts request ==>>', accountss);
+    if (accountss.length > Object.keys(accounts).length) {
+      saveAccountInRedux(accountss[accountss.length - 1]);
+    }
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accountss]);
+
+  useEffect(() => {
+    console.log('auth requests ==>>', authRequests);
+  }, [authRequests]);
+
+  useEffect(() => {
+    console.log('metaRequests ==>>', metaRequests);
+  }, [metaRequests]);
+
+  useEffect(() => {
+    console.log('signRequests ==>>', signRequests);
+  }, [signRequests]);
 
   const renderFunction = () => {
     let content;

@@ -3,6 +3,7 @@
 
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
+import { getId } from '@polkadot/extension-base/utils/getId';
 
 let Port = {};
 let handlers = {};
@@ -11,7 +12,8 @@ initPort();
 
 export async function initPort() {
   if (Port.disconnect) {
-    Port.disconnect();
+    console.log('messaging desconnecting port');
+    await Port.disconnect();
   }
   handlers = {};
   Port = chrome.runtime.connect({ name: PORT_EXTENSION });
@@ -41,7 +43,7 @@ async function addListener() {
 function sendMessage(message, request, subscriber) {
   console.log('message ==>>', message);
   return new Promise((resolve, reject) => {
-    const id = Date.now();
+    const id = getId();
     handlers[id] = { reject, resolve, subscriber };
     Port.postMessage({ id, message, request: request || {} });
   });
