@@ -34,6 +34,10 @@ function ApiManager({ rpc }) {
       dispatch(setApiInitializationStarts(true));
       const apiR = await providerInitialization(rpcUrl);
       console.log('In api manager', apiR);
+
+      localStorage.setItem('rpcUrl', rpcUrl);
+      await initPort();
+
       const tokenName = await apiR.registry.chainTokens[0];
       const tokenLength = await apiR.registry.chainTokens.length;
       console.log('In api manager token length', tokenLength);
@@ -48,8 +52,7 @@ function ApiManager({ rpc }) {
       console.log('api before isReady ==>>', apiR);
       // await apiR.isReady;
       setApiState(apiR);
-      localStorage.setItem('rpcUrl', rpcUrl);
-      await initPort();
+
       dispatch(setApi(apiR));
 
       dispatch(setApiInitializationStarts(false));

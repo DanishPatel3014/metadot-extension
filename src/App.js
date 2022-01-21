@@ -76,9 +76,7 @@ function App() {
   const { api, accounts } = currentUser;
 
   useEffect(() => {
-    setTimeout(() => {
-      subscribeAccounts(setAccountss);
-    }, 3000);
+    subscribeAccounts(setAccountss);
     // subscribeAuthorizeRequests(setAuthRequests);
     // subscribeMetadataRequests(setMetaRequests),
     // subscribeSigningRequests(setSignRequests),

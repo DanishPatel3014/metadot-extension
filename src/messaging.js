@@ -10,7 +10,9 @@ let handlers = {};
 initPort();
 
 export async function initPort() {
-  console.log('reinitiizing port');
+  if (Port.disconnect) {
+    Port.disconnect();
+  }
   handlers = {};
   Port = chrome.runtime.connect({ name: PORT_EXTENSION });
   await addListener();
