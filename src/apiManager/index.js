@@ -2,7 +2,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import chrome from '@polkadot/extension-inject/chrome';
 import { setApi, setApiInitializationStarts } from '../redux/slices/api';
 import { setBalance, setBalanceInUsd, setTokenName } from '../redux/slices/activeAccount';
 import {
@@ -11,8 +10,8 @@ import {
 } from '../redux/slices/modalHandling';
 import { helpers } from '../utils';
 import services from '../utils/services';
-import { setPort } from '../redux/slices/communicate';
-import { addListener } from '../messaging';
+
+import { initPort } from '../messaging';
 
 const { convertIntoUsd } = helpers;
 const { getBalance, providerInitialization, getBalanceWithMultipleTokens } = services;
@@ -50,10 +49,7 @@ function ApiManager({ rpc }) {
       // await apiR.isReady;
       setApiState(apiR);
       localStorage.setItem('rpcUrl', rpcUrl);
-      // if (communicate.port.disconnect)communicate.port.disconnect();
-      const port = chrome.runtime.connect({ name: 'extension' });
-      dispatch(setPort(port));
-      addListener();
+      await initPort();
       dispatch(setApi(apiR));
 
       dispatch(setApiInitializationStarts(false));

@@ -4,27 +4,20 @@
 import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
-import { setPort } from './redux/slices/communicate';
-import store from './redux/store';
+let Port = {};
+let handlers = {};
 
-const tPort = chrome.runtime.connect({ name: PORT_EXTENSION });
-store.dispatch(setPort(tPort));
-addListener();
+initPort();
 
-const handlers = {};
-
-function sendMessage(message, request, subscriber) {
-  const { communicate } = store.getState();
-  return new Promise((resolve, reject) => {
-    const id = Date.now();
-    handlers[id] = { reject, resolve, subscriber };
-    communicate.port.postMessage({ id, message, request: request || {} });
-  });
+export async function initPort() {
+  console.log('reinitiizing port');
+  handlers = {};
+  Port = chrome.runtime.connect({ name: PORT_EXTENSION });
+  await addListener();
 }
 
-export async function addListener() {
-  const { communicate } = store.getState();
-  communicate.port.onMessage.addListener((data) => {
+async function addListener() {
+  Port.onMessage.addListener((data) => {
     const handler = handlers[data.id];
     if (!handler) {
       console.error(`Unknown response: ${JSON.stringify(data)}`);
@@ -40,6 +33,15 @@ export async function addListener() {
     } else {
       handler.resolve(data.response);
     }
+  });
+}
+
+function sendMessage(message, request, subscriber) {
+  console.log('message ==>>', message);
+  return new Promise((resolve, reject) => {
+    const id = Date.now();
+    handlers[id] = { reject, resolve, subscriber };
+    Port.postMessage({ id, message, request: request || {} });
   });
 }
 

@@ -32,8 +32,7 @@ import {
 const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
-  const [accounts, setAccounts] = useState([]);
-  const [api, setApi] = useState([]);
+  const [accountss, setAccountss] = useState([]);
   const [authRequests, setAuthRequests] = useState([]);
   // const [metaRequests, setMetaRequests] = useState([]);
   // const [signRequests, setSignRequests] = useState([]);
@@ -52,13 +51,13 @@ function App() {
       }));
     };
 
-    console.log('accounts ==>>', accounts);
-    if (accounts.length > 0) {
-      saveAccountInRedux(accounts[accounts.length - 1]);
+    console.log('accountss ==>>', accountss, accounts);
+    if (accountss.length > Object.keys(accounts).length) {
+      saveAccountInRedux(accountss[accountss.length - 1]);
     }
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accounts]);
+  }, [accountss]);
 
   useEffect(() => {
     console.log('authRequests ==>>', authRequests);
@@ -74,19 +73,17 @@ function App() {
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
-  const { communicate } = currentUser;
+  const { api, accounts } = currentUser;
 
   useEffect(() => {
-    console.log('chal raha hun bhai men');
-    if (communicate.port) {
-      console.log('chal raha hun bhai men');
-      subscribeAccounts(setAccounts);
-    }
+    setTimeout(() => {
+      subscribeAccounts(setAccountss);
+    }, 3000);
     // subscribeAuthorizeRequests(setAuthRequests);
     // subscribeMetadataRequests(setMetaRequests),
     // subscribeSigningRequests(setSignRequests),
-  }, [communicate.port]);
-  console.log('app.js rereanderd');
+  }, [api.api]);
+
   const {
     isResponseModalOpen, mainText, subText, responseImage,
   } = useSelector(
