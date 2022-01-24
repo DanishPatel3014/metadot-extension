@@ -280,20 +280,18 @@ const Send = () => {
           accountToSate.value, amountState.value * 10 ** decimals,
         );
 
-      console.log('created transaction ==>>', tx);
+      const nonce = await api.rpc.system.accountNextIndex(address);
 
-      const transactionData = {
-        method: tx.toHex(),
-        specVersion: api.runtimeVersion.specVersion,
+      const signer = api.createType('SignerPayload', {
+        method: tx,
+        nonce,
         genesisHash: api.genesisHash,
-        tip: tx.tip,
-      };
+        blockHash: api.genesisHash,
+        runtimeVersion: api.runtimeVersion,
+        version: api.extrinsicVersion,
+      });
 
-      console.log('created transaction data ==>>', transactionData);
-
-      const txPayload = api.createType('ExtrinsicPayload', transactionData, { version: tx.version });
-
-      console.log('created transaction payload ==>>', txPayload);
+      const txPayload = api.createType('ExtrinsicPayload', signer.toPayload(), { version: api.extrinsicVersion });
 
       const txHex = txPayload.toU8a(true);
 
