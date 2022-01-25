@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension-ui authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PORT_EXTENSION } from '@polkadot/extension-base/defaults';
+import { PORT_EXTENSION } from 'metadot-extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
@@ -65,12 +65,8 @@ export async function exportAccount(address, password) {
   return sendMessage('pri(accounts.export)', { address, password });
 }
 
-export async function getAuthorizePair(address, password) {
-  return sendMessage('pri(accounts.getAuthorizePair)', { address, password });
-}
-
-export async function executeTransaction(address, password, txHex) {
-  return sendMessage('pri(accounts.executeTransaction)', {
-    address, password, txHex,
+export async function signTransaction(address, password, transaction) {
+  return sendMessage('pri(accounts.sign)', {
+    address, password, transaction,
   });
 }

@@ -14,7 +14,6 @@ import {
 } from './styledComponent';
 import { WarningText } from '../..';
 import { setAuthScreenModal, setConfirmSendModal } from '../../../redux/slices/modalHandling';
-import { getAuthorizePair, exportAccount } from '../../../messaging';
 
 const { mainHeadingfontFamilyClass, subHeadingfontFamilyClass } = fonts;
 const { decrypt } = accounts;
@@ -39,9 +38,6 @@ function AuthModal({
       // console.log('sender =>>', sender);
       // const unlockedSender = sender.unlock(password);
       // console.log('sender unlocked =>>', unlockedSender);
-
-      const sender = await getAuthorizePair(currentUser.publicKey, password);
-      console.log('sender pair ==>>', sender);
 
       // const accountJson = await exportAccount(currentUser.publicKey, password);
       // console.log('sender json ==>>', accountJson);

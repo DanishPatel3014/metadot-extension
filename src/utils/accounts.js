@@ -3,7 +3,7 @@
 import keyring from '@polkadot/ui-keyring';
 import { cryptoWaitReady, mnemonicGenerate } from '@polkadot/util-crypto';
 import encryptpwd from 'encrypt-with-password';
-import { AccountsStore } from '@polkadot/extension-base/stores';
+import { AccountsStore } from 'metadot-extension-base/stores';
 
 function GenerateSeedPhrase() {
   try {

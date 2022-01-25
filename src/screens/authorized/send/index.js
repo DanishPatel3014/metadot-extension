@@ -3,7 +3,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
-import transactionHandler from '@polkadot/extension-base/background/handlers';
 import { addTransaction } from '../../../redux/slices/transactions';
 import { helpers } from '../../../utils';
 import services from '../../../utils/services';
@@ -28,7 +27,7 @@ import ToInput from './toInput';
 import AmountInput from './amountInput';
 import UnsuccessCheckIcon from '../../../assets/images/TransactionFailed.svg';
 import SuccessCheckIcon from '../../../assets/images/success.png';
-import { executeTransaction } from '../../../messaging';
+import { signTransaction } from '../../../messaging';
 
 const { Keyring } = require('@polkadot/api');
 
@@ -297,14 +296,14 @@ const Send = () => {
 
       console.log('execute transaction params ==>>', address, password, txHex);
 
-      const response = await executeTransaction(address,
+      const response = await signTransaction(address,
         password, txHex);
 
       console.log('execute transaction returns ==>>', response);
 
-      const { signatureHex } = response;
+      const { signature } = response;
 
-      tx.addSignature(address, signatureHex, txPayload);
+      tx.addSignature(address, signature, txPayload);
 
       console.log('execute transaction returns signedTransaction ==>>', tx);
 

@@ -1,4 +1,4 @@
-import { enable, handleResponse, redirectIfPhishing } from '@polkadot/extension-base/page';
+import { enable, handleResponse, redirectIfPhishing } from 'metadot-extension-base/page';
 import { injectExtension } from '@polkadot/extension-inject';
 
 window.addEventListener('message', ({ data, source }) => {

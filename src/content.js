@@ -1,7 +1,7 @@
 // Copyright 2019-2021 @polkadot/extension authors & contributors
 // SPDX-License-Identifier: Apache-2.0
 
-import { PORT_CONTENT } from '@polkadot/extension-base/defaults';
+import { PORT_CONTENT } from 'metadot-extension-base/defaults';
 import chrome from '@polkadot/extension-inject/chrome';
 
 console.log('PORT_CONTENT ==>>', PORT_CONTENT);

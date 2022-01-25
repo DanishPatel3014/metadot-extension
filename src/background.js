@@ -3,9 +3,9 @@
 
 // Runs in the extension background, handling all keyring access
 
-import handlers from '@polkadot/extension-base/background/handlers';
-import { PORT_CONTENT, PORT_EXTENSION } from '@polkadot/extension-base/defaults';
-import { AccountsStore } from '@polkadot/extension-base/stores';
+import handlers from 'metadot-extension-base/background/handlers';
+import { PORT_CONTENT, PORT_EXTENSION } from 'metadot-extension-base/defaults';
+import { AccountsStore } from 'metadot-extension-base/stores';
 import chrome from '@polkadot/extension-inject/chrome';
 import keyring from '@polkadot/ui-keyring';
 import { assert } from '@polkadot/util';
