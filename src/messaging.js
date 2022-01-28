@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { PORT_EXTENSION } from 'metadot-extension-base/defaults';
+import { getId } from 'metadot-extension-base/utils/getId';
 import chrome from '@polkadot/extension-inject/chrome';
 
 const port = chrome.runtime.connect({ name: PORT_EXTENSION });
@@ -28,7 +29,7 @@ port.onMessage.addListener((data) => {
 function sendMessage(message, request, subscriber) {
   console.log('execute transaction messaging', message, request, subscriber);
   return new Promise((resolve, reject) => {
-    const id = Date.now();
+    const id = getId();
     handlers[id] = { reject, resolve, subscriber };
     port.postMessage({ id, message, request: request || {} });
   });

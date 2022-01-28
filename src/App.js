@@ -22,6 +22,9 @@ import { addAccount } from './redux/slices/accounts';
 
 import {
   subscribeAccounts,
+  subscribeAuthorizeRequests,
+  subscribeMetadataRequests,
+  subscribeSigningRequests,
   approveAuthRequest,
 } from './messaging';
 
@@ -33,16 +36,15 @@ const { AuthRoutes, UnAuthRoutes } = routes;
 
 function App() {
   const [accounts, setAccounts] = useState([]);
-  const [api, setApi] = useState([]);
   const [authRequests, setAuthRequests] = useState([]);
-  // const [metaRequests, setMetaRequests] = useState([]);
-  // const [signRequests, setSignRequests] = useState([]);
+  const [metaRequests, setMetaRequests] = useState([]);
+  const [signRequests, setSignRequests] = useState([]);
 
   useEffect(() => {
     subscribeAccounts(setAccounts);
-    // subscribeAuthorizeRequests(setAuthRequests);
-    // subscribeMetadataRequests(setMetaRequests),
-    // subscribeSigningRequests(setSignRequests),
+    subscribeAuthorizeRequests(setAuthRequests);
+    subscribeMetadataRequests(setMetaRequests);
+    subscribeSigningRequests(setSignRequests);
   }, []);
 
   useEffect(() => {
@@ -71,13 +73,13 @@ function App() {
     console.log('authRequests ==>>', authRequests);
   }, [authRequests]);
 
-  // useEffect(() => {
-  //   console.log('metaRequests ==>>', metaRequests);
-  // }, []);
+  useEffect(() => {
+    console.log('metaRequests ==>>', metaRequests);
+  }, [metaRequests]);
 
-  // useEffect(() => {
-  //   console.log('signRequests ==>>', signRequests);
-  // }, []);
+  useEffect(() => {
+    console.log('signRequests ==>>', signRequests);
+  }, [signRequests]);
 
   // prettier-ignore
   const currentUser = useSelector((state) => state);
