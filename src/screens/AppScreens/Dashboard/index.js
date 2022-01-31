@@ -21,7 +21,7 @@ import {
   blake2AsHex, decodeAddress,
 } from '@polkadot/util-crypto';
 import { FixedPointNumber } from '@acala-network/sdk-core';
-import Acala from '@acala-network/api';
+// import Acala from '@acala-network/api';
 import { ethers } from 'ethers';
 
 // Drop Down Icons
@@ -128,35 +128,24 @@ function Dashboard(props) {
   async function main() {
     const { api } = currentUser.api;
 
-    // Retrieve the initial balance. Since the call has no callback, it is simply a promise
-    // that resolves to the current on-chain value
     const {
       data: { free: previousFree },
       nonce: previousNonce,
     } = await api.query.system.account(publicKey);
     const decimalPlaces = await api.registry.chainDecimals;
-    // Here we subscribe to any balance changes and update the on-screen value
     api.query.system.account(
       publicKey,
       // eslint-disable-next-line consistent-return
-      ({ data: { free: currentFree }, nonce: currentNonce }) => {
-        // Calculate the delta
+      async ({ data: { free: currentFree }, nonce: currentNonce }) => {
         const change = currentFree.sub(previousFree);
-        // Only display positive value changes (Since we are pulling `previous` above already,
-        // the initial balance change will also be zero)
         if (!change.isZero()) {
-          // console.clear();
           console.log('Balance changed', change);
           const bal = getBalance(api, publicKey)
             .then((res) => {
               console.log('Token name', tokenName, 'balance', res);
-              // dispatch(updateSingleTokenBalance({ name: tokenName, balance: res }));
-              // dispatch(setBalance(res));
+              dispatch(updateSingleTokenBalance({ name: tokenName, balance: res }));
             })
             .catch((err) => console.log('Err', err));
-
-          // previousFree = currentFree;
-          // previousNonce = currentNonce;
           return bal;
         }
       },
@@ -242,7 +231,7 @@ function Dashboard(props) {
   };
 
   const getExistentialDeposit = async () => {
-    console.log('Acala', Acala);
+    // console.log('Acala', Acala);
     const data = await currentUser.api.api.consts.balances.existentialDeposit;
     console.log('Data', data);
 
@@ -583,7 +572,10 @@ function Dashboard(props) {
         currentData: BetaNetworks,
       });
     } else {
+      console.clear();
+      console.log('Data prefix', data.prefix);
       const publicKeyOfRespectiveChain = addressMapper(currentUser.account.publicKey, data.prefix);
+      console.log('respective addr', publicKeyOfRespectiveChain);
       dispatch(setApiInitializationStarts(true));
       dispatch(setLoadingFor('Api Initialization...'));
       dispatch(setRpcUrl({ rpcUrl: data.rpcUrl }));
@@ -892,12 +884,12 @@ function Dashboard(props) {
       {/* <button onClick={sendTransaction}>Send</button> */}
       <button onClick={decryptSeed}>Decrypt</button>
       {/* <button onClick={getbalanceKarura}>Get karura balance</button> */}
-      <button onClick={getExistentialDeposit}>Get existentialDeposit</button>
+      {/* <button onClick={getExistentialDeposit}>Get existentialDeposit</button> */}
       {/* <button onClick={getTxFee}>Get Transaction fee</button> */}
       {/* <button onClick={getBloackDetails}>Get block details</button> */}
       {/* <button onClick={doTransaction}>Do transaction</button> */}
       {/* <button onClick={getMultipleTokensBalance}>Multiple tokens balance</button> */}
-      <button onClick={nonNativeTokenED}>Non native tokens ED</button>
+      {/* <button onClick={nonNativeTokenED}>Non native tokens ED</button> */}
       {/* <button onClick={setMultipleTokens}>Set multiple tokens</button> */}
       {/* <button onClick={getMultipleTokens}>Get multiple tokens</button> */}
       {/* <button onClick={fetchBalance}>Fetch</button> */}
@@ -906,19 +898,19 @@ function Dashboard(props) {
       {/* <button onClick={() => updateTheBalance({ name: 'KSM', balance: 100 })}>Update single balance</button> */}
 
       {/* <button onClick={() => dispatch(updateSingleTokenBalance({ name: 'KSM', balance: 100 }))}>Redux [][] Update single balance</button> */}
-      <button onClick={() => console.log(' Redux =====>>>', currentUser)}>Get balance details</button>
-      {/* <button onClick={async () => {
-        // const bal = await getBalance(currentUser.api.api, currentUser.account.publicKey);
-        // console.log('BAL ||||', bal);
+      {/* <button onClick={() => console.log(' Redux =====>>>', currentUser)}>Get balance details</button> */}
+      <button onClick={async () => {
+        const bal = await getBalance(currentUser.api.api, currentUser.account.publicKey);
+        console.log('BAL ||||', bal);
 
         // dispatch(setBalances(bal));
-        dispatch(setBalances(getBalances()));
-        console.log('Not soooo', getBalances());
+        // dispatch(setBalances(getBalances()));
+        // console.log('Not soooo', getBalances());
       }}
       >
-        Get
-      </button> */}
-      {/* <button onClick={() => convertIntoH160Address(publicKey)}>Eth</button> */}
+        Get Balance
+      </button>
+      <button onClick={() => convertIntoH160Address(publicKey)}>Eth</button>
       {/* <button onClick={getEthAddressFromEthersLib}> getEthAddressFromEthersLib </button> */}
       {/* <button onClick={deposit}>Deposit</button>
       <button onClick={XCMP2}>XCMP</button> */}

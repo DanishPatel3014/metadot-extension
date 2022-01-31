@@ -86,7 +86,7 @@ function MainCard({
       }
       return null;
     });
-  });
+  }, [balances, currentUser]);
 
   return (
     <MainPanel>
@@ -130,7 +130,8 @@ function MainCard({
             <Balance id="balance" className={mainHeadingfontFamilyClass}>
               <div className={`topTooltip ${mainHeadingfontFamilyClass}`}>
                 <span id="trim-balance">
-                  { trimBalance(nativeBalance)}
+                  {/* { trimBalance(nativeBalance)} */}
+                  {nativeBalance === undefined ? 0 : trimBalance(nativeBalance) }
                 </span>
                 <span id="token-name" style={{ marginLeft: 7 }}>{tokenName}</span>
                 <span id="complete-balance" {...addTooltipText}>

@@ -51,6 +51,7 @@ const getBalance = async (api, account) => {
     return balance;
   }
   const balance = await getBalanceWithSingleToken(api, account);
+  console.log('Balance in service', balance);
   return balance;
 };
 
@@ -172,11 +173,13 @@ const setMultipleTokens = async (api, account, chainName) => {
 
 const getTransactionFee = async (api, sender, recipient, decimalPlaces, amount) => {
   console.log('In service ===>>', sender, recipient, decimalPlaces, amount);
-  const amountSending = amount * 10 ** decimalPlaces;
+  // eslint-disable-next-line no-undef
+  const amountSending = BigInt(amount * 10 ** decimalPlaces);
+  console.log('API:', api);
   // const amountSending = 1;
   const info = await api.tx.balances
     // eslint-disable-next-line no-undef
-    .transfer(sender, BigInt(amountSending))
+    .transfer(sender, amountSending)
     .paymentInfo(recipient);
 
   return info;

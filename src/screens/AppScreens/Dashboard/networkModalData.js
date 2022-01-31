@@ -20,6 +20,8 @@ const {
   MOONBASE_CONFIG,
   ASGARD_CONFIG,
   SHIBUYA_CONFIG,
+  BITCOUNTRY_CONFIG,
+  AUTOMATA_CONFIG,
 } = constants;
 
 const availableNetworks = [
@@ -103,10 +105,12 @@ const KusamaMainNetworks = [
   {
     name: SHIDEN_CONFIG.CHAIN_NAME,
     icon: SHIDEN_CONFIG.LOGO,
+    rpcUrl: SHIDEN_CONFIG.RPC_URL,
     parachain: true,
     mainNetwork: true,
     testNet: 'Dusty',
-    disabled: true,
+    disabled: false,
+    prefix: 5,
   },
   {
     name: KHALA_CONFIG.CHAIN_NAME,
@@ -168,7 +172,9 @@ const TestNetworks = [
   {
     name: MOONBASE_CONFIG.CHAIN_NAME,
     theme: MOONBASE_CONFIG.LOGO,
-    disabled: true,
+    rpcUrl: MOONBASE_CONFIG.RPC_URL,
+    disabled: false,
+    prefix: 5,
   },
   {
     name: ASGARD_CONFIG.CHAIN_NAME,
@@ -181,6 +187,22 @@ const TestNetworks = [
     disabled: true,
     rpcUrl: PHALA_CONFIG.RPC_URL,
     tokenName: PHALA_CONFIG.TOKEN_NAME,
+  },
+  {
+    name: BITCOUNTRY_CONFIG.CHAIN_NAME,
+    theme: BITCOUNTRY_CONFIG.LOGO,
+    rpcUrl: BITCOUNTRY_CONFIG.RPC_URL,
+    tokenName: BITCOUNTRY_CONFIG.TOKEN_NAME,
+    disabled: true,
+    prefix: 42,
+  },
+  {
+    name: AUTOMATA_CONFIG.CHAIN_NAME,
+    theme: AUTOMATA_CONFIG.LOGO,
+    rpcUrl: AUTOMATA_CONFIG.RPC_URL,
+    tokenName: AUTOMATA_CONFIG.TOKEN_NAME,
+    disabled: false,
+    prefix: 11820,
   },
 ];
 

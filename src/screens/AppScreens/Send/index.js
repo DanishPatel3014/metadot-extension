@@ -145,6 +145,29 @@ const Send = () => {
     };
   }, [isValid, amountIsValid, amountState.isValid, location]);
 
+  // useEffect(async() => {
+
+  //   const info = await getTransactionFee(api, currentUser.account.publicKey,
+  //     accountToSate.value, decimalPlaces, amountState.value);
+  //   // const info = await api.tx.balances
+  //   //   .transfer(currentUser.account.publicKey, amountState.value * 10 ** decimalPlaces)
+  //   //   .paymentInfo(accountToSate.value);
+  //   const txFee = await convertTransactionFee(info.partialFee.toHuman());
+  //   console.log('transaction fee ---------', txFee);
+  // });
+
+  useEffect(() => {
+    async function get() {
+      const info = await api.tx.balances
+        .transfer(currentUser.account.publicKey, 10)
+        .paymentInfo(currentUser.account.publicKey);
+      const res = await convertTransactionFee(info.partialFee.toHuman());
+      console.log('Res tx fee', res, res / 10);
+      setTransactionFee(res);
+    }
+    get();
+  });
+
   const accountToChangeHandler = (e) => {
     accountDispatch({ type: 'USER_INPUT', val: e, valid: currentUser.account.publicKey });
   };
@@ -164,28 +187,12 @@ const Send = () => {
 
   const convertTransactionFee = (fee) => {
     const splitFee = fee.split(' ');
-    if (location.state.tokenName === 'WND') {
-      return (splitFee[0] * 10 ** -3);
-    }
     if (location.state.tokenName === 'KSM') {
       return (splitFee[0] * 10 ** -6);
     }
     if (location.state.tokenName === 'PLD') {
       return splitFee[0];
     }
-    if (location.state.tokenName === 'ACA') {
-      return (splitFee[0] * 10 ** -3);
-    }
-    if (location.state.tokenName === 'ROC') {
-      return (splitFee[0] * 10 ** -3);
-    }
-    if (location.state.tokenName === 'DOT') {
-      return (splitFee[0] * 10 ** -3);
-    }
-    if (location.state.tokenName === 'SBY') {
-      return (splitFee[0] * 10 ** -3);
-    }
-
     return (splitFee[0] * 10 ** -3);
   };
 
@@ -223,16 +230,86 @@ const Send = () => {
   };
 
   const maxInputHandler = async () => {
-    console.log('Start*******');
+    console.clear();
     const decimalPlaces = await api.registry.chainDecimals;
     const info = await api.tx.balances
-      .transfer(currentUser.account.publicKey, amountState.value * 10 ** decimalPlaces)
-      .paymentInfo(accountToSate.value);
-    const txFee = await convertTransactionFee(info.partialFee.toHuman());
-    console.log('transaction fee ---------', txFee);
-    amountDispatch({ type: 'MAX_INPUT', bal: currentUser.account.balance, txFee });
-    console.log('End--------------');
+      .transfer(currentUser.account.publicKey, 10)
+      .paymentInfo(currentUser.account.publicKey);
+    const adjFee = info.partialFee.muln(110).div(BN_HUNDRED);
+    console.log('Adj fee', adjFee);
+    const { data: balance } = await
+    api.query.system.account(currentUser.account.publicKey);
+    const maxTransfer = balance.free - adjFee;
+    console.log('Max transfer', maxTransfer);
+    console.log('Adj fee converted [][]', adjFee);
+    if (maxTransfer > currentUser.api.api.consts.balances.existentialDeposit) {
+      console.log('Tx can be done', maxTransfer / 10 ** decimalPlaces);
+      amountDispatch({ type: 'MAX_INPUT', bal: maxTransfer / 10 ** decimalPlaces, txFee: adjFee * 10 ** decimalPlaces });
+    } else {
+      console.log('Tx can not be done');
+      alert('Tx cannot be done, balance too low');
+    }
   };
+
+  // const maxInputHandler = async () => {
+  //   console.clear();
+  //   console.log('Start*******', location.state);
+  //   const decimalPlaces = await api.registry.chainDecimals;
+  //   const info = await api.tx.balances
+  //     .transfer(currentUser.account.publicKey, 10)
+  //     .paymentInfo(currentUser.account.publicKey);
+  //     // const res = await getTransactionFee(api, currentUser.account.publicKey,
+  //     //   currentUser.account.publicKey, location.state.decimalPlaces, 0.0000000000122323);
+  //   const txFee = await convertTransactionFee(info.partialFee.toHuman());
+  //   console.log('Res tx fee', txFee);
+  //   // const adjFee = info.partialFee.muln(110).div(BN_HUNDRED);\
+  //   const adjFee = (txFee * 110) / 100;
+  //   console.log('Adj fee not converted', adjFee);
+  //   console.log('Adj fee conversion', adjFee * 10 ** decimalPlaces);
+  //   console.log('Total balance', location.state.amount);
+  //   const maxTransfer = location.state.amount - adjFee;
+  //   const { data: balance } = await
+  //    api.query.system.account('5GjSQRFYEFBY1nmVuGHTyKkRHrodQmUKdA7kWzfmfLp262xG');
+  //   console.log('In service balance', balance.free);
+  //   console.log('partialFee -->', info.partialFee.toHuman());
+  //   console.log('Max transfer', maxTransfer);
+  //   if (maxTransfer * 10 ** decimalPlaces
+  //     > currentUser.api.api.consts.balances.existentialDeposit) {
+  //     console.log('Tx can be done the max transfer is', maxTransfer);
+  //   } else {
+  //     console.log('Tx cannot be done');
+  //   }
+  //   // const adjFee = (2 / 100) * txFee;
+  //   console.log('Adj fee in max input', adjFee);
+  //   amountDispatch({ type: 'MAX_INPUT', bal: location.state.amount, txFee: txFee + adjFee });
+  //   console.log('Total Amount + txFee', location.state.amount, txFee + adjFee);
+  //   // if (location.state.isNative) {
+  //   //   console.log('Subtraction [][]', location.state.amount - txFee);
+  //   // }
+  //   // if (location.state.isNative) {
+  //   //   if (location.state.amount < (Number(amountState.value) + Number(txFee))) {
+  //   //     setInsufficientBal(true);
+  //   //     console.log('hello');
+  //   //   } else {
+  //   //     console.log('Open password modal');
+  //   //     dispatch(setConfirmSendModal(true));
+  //   //   }
+  //   // } else {
+  //   //   currentUser.account.balances.map((singleToken, i) => {
+  //   //     if (singleToken.isNative) {
+  //   //       console.log('In else single token', singleToken);
+  //   //       if (txFee > singleToken.balance) {
+  //   //         setInsufficientBal(true);
+  //   //       } else {
+  //   //         dispatch(setConfirmSendModal(true));
+  //   //       }
+  //   //     }
+  //   //     return null;
+  //   //   });
+  //   // }
+  //   // amountDispatch({ type: 'MAX_INPUT', bal: currentUser.account.balance, txFee });
+  //   console.log('End--------------');
+  // };
 
   // Check the sender existential deposit
   const validateTxErrors = async () => {
@@ -270,6 +347,7 @@ const Send = () => {
   };
 
   const doTransaction = async (deSeed) => {
+    console.log('Do transaction working');
     try {
       // console.clear();
       const keyring = new Keyring({ type: 'sr25519' });
@@ -310,41 +388,20 @@ const Send = () => {
       //   },
       // );
 
+      console.log('Token length', tokenLength);
+      // const tx = currentUser.api.api.tx.transferAll;
       const tx = tokenLength > 1 ? currentUser.api.api.tx.currencies
         .transfer(
           accountToSate.value,
           {
             Token: location.state.tokenName,
           },
-          // eslint-disable-next-line no-undef
           amountSending,
         ) : currentUser.api.api.tx.balances
         .transfer(
           // eslint-disable-next-line no-undef
           accountToSate.value, BigInt(amountSending),
         );
-      //     const tx = currentUser.api.api.tx.balances
-      // .transfer(
-      // // eslint-disable-next-line no-undef
-      //   accountToSate.value, BigInt(amountSending),
-      // );
-
-      // const tx = await currentUser.api.api.tx.currencies
-      //   .transfer(
-      //     accountToSate.value,
-      //     {
-      //       Token: location.state.tokenName,
-      //     },
-      //     // eslint-disable-next-line no-undef
-      //     amountSending,
-      //   );
-      // .signAndSend(sender, async ({ status, events }) => {
-      //   if (status.isInBlock) {
-      //     console.log('Status', status.isInBlock, status.isFinalized);
-      //     console.log('EVents', events);
-      //     const hash = status.asInBlock.toString();
-      //     console.log('Hash before tx ', hash);
-      //   }
 
       console.log('Amount sending .....', amountState.value * 10 ** decimals);
       const result = tx.signAndSend(sender, ({ status, events }) => {
@@ -750,17 +807,15 @@ const Send = () => {
       getTransactionFee(api, currentUser.account.publicKey,
         accountToSate.value, decimalPlaces, amountState.value);
       console.log('After info', info);
-      // console.clear();
-
-      console.log('queryInfo:', JSON.stringify(info.toHuman(), null, 2));
-      console.log('queryInfo:', JSON.stringify(info.partialFee.toHuman(), null, 2));
       const txFee = await convertTransactionFee(info.partialFee.toHuman());
+      // const txFee = 0.00152;
       console.log('convert transaction fee done', txFee);
       // const adjFee = info.partialFee.muln(110).div(BN_HUNDRED);
-      const adjFee = (info.partialFee * 1000) / BN_HUNDRED;
-      console.log('Adj fee', adjFee);
-      const maxTransfer = location.state.amount - adjFee;
-      console.log('Max transfer fee', maxTransfer);
+      // const adjFee = (info.partialFee * 1000) / BN_HUNDRED;
+      // const adjFee = (2 / 100) * txFee;
+      // console.log('Adj fee', adjFee);
+      // const maxTransfer = location.state.amount - adjFee;
+      // console.log('Max transfer fee', maxTransfer);
       if (location.state.isNative) {
         if (location.state.amount < (Number(amountState.value) + Number(txFee))) {
           setInsufficientBal(true);
@@ -845,6 +900,7 @@ const Send = () => {
     trimBalance,
     errorMessages,
     error,
+    transactionFee,
   };
 
   const btn = {

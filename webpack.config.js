@@ -33,12 +33,17 @@ module.exports = {
         test: /\.js$/,
         exclude: [/node_modules/],
         include: path.resolve(__dirname, 'src'),
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env', '@babel/preset-react'],
+        use: [
+          {
+            loader: require.resolve('@open-wc/webpack-import-meta-loader'),
           },
-        },
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env', '@babel/preset-react'],
+            },
+          },
+        ],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,

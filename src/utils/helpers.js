@@ -62,7 +62,7 @@ function validateAddress(userPublicAddress, senderPublicAddress) {
 }
 
 function validateAmount(userCurrentAmount, sendAmount) {
-  console.log(userCurrentAmount, sendAmount);
+  console.log('In validate amount helpers', userCurrentAmount, sendAmount);
   try {
     if (userCurrentAmount < sendAmount) {
       console.log('Throw error');
@@ -91,6 +91,7 @@ function isUserNameValid(username) {
 
 // eslint-disable-next-line no-unused-vars
 const trimBalance = (value) => {
+  console.log('Trim balance', value);
   const val = value.toString();
   const trimmedValue = val.slice(0, (val.indexOf('.')) + 4);
   return trimmedValue;

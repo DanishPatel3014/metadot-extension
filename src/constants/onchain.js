@@ -56,7 +56,8 @@ const SHIDEN_CONFIG = {
   CHAIN_NAME: 'Shiden',
   TOKEN_NAME: '',
   LOGO: ShidenIcon,
-  RPC_URL: '',
+  RPC_URL: 'wss://shiden.api.onfinality.io/ws?apikey=867c8261-9090-484f-9428-b8be32aa8762',
+  PREFIX: 5,
 };
 
 const BIFROST_CONFIG = {
@@ -110,7 +111,14 @@ const MOONBASE_CONFIG = {
   CHAIN_NAME: 'Moonbase',
   TOKEN_NAME: '',
   LOGO: MoonriverIcon,
-  RPC_URL: '',
+  RPC_URL: 'wss://moonbeam-alpha.api.onfinality.io/public-ws',
+};
+
+const BITCOUNTRY_CONFIG = {
+  CHAIN_NAME: 'Bit Country',
+  TOKEN_NAME: '',
+  LOGO: MoonriverIcon,
+  RPC_URL: 'wss://tewai-rpc.bit.country',
 };
 
 const ASGARD_CONFIG = {
@@ -141,10 +149,10 @@ const SHIBUYA_CONFIG = {
   TOKEN_NAME: 'SBY',
   LOGO: shibuyaIcon,
   RPC_URL: 'wss://rpc.shibuya.astar.network',
-  // https://rpc.shibuya.astar.network:8545
   PREFIX: 5,
 
   // rpc url's
+  // 'wss://rpc.shibuya.astar.network'
   // wss://shibuya.eusko.in
   // wss://shibuya1.eusko.in
   // wss://shibuya2.eusko.in
@@ -152,6 +160,14 @@ const SHIBUYA_CONFIG = {
   // SCAN
   // https://shibuya.subscan.io
 
+};
+
+const AUTOMATA_CONFIG = {
+  CHAIN_NAME: 'Automata',
+  TOKEN_NAME: 'CTX',
+  LOGO: astarIcon,
+  RPC_URL: 'wss://cf-api.ata.network',
+  PREFIX: 11820,
 };
 
 export default {
@@ -173,4 +189,6 @@ export default {
   ASGARD_CONFIG,
   KHALA_CONFIG,
   SHIBUYA_CONFIG,
+  BITCOUNTRY_CONFIG,
+  AUTOMATA_CONFIG,
 };
